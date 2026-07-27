@@ -304,7 +304,7 @@
             padding: 4px 0;
         }
 
-        /* TIMER DISPLAY - RIMOSSO IL POSIZIONAMENTO DEI DOT QUI */
+        /* TIMER DISPLAY */
         #timer-display {
             flex: 1 1 auto;
             display: flex;
@@ -354,14 +354,14 @@
             margin: 2px 0 4px 0;
         }
 
-        /* ANELLI CONCENTRICI */
+        /* ANELLI CONCENTRICI - INGRANDITI SU IPHONE */
         #progress-ring-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(220px, 70vw, 650px);
-            height: clamp(220px, 70vw, 650px);
+            width: clamp(260px, 75vw, 680px);
+            height: clamp(260px, 75vw, 680px);
             pointer-events: none;
             z-index: 0;
         }
@@ -372,7 +372,7 @@
             transition: stroke-dashoffset 0.15s linear, stroke 0.3s ease;
         }
 
-        /* PALLINI DI AVANZAMENTO (ORA FUORI DAI CERCHI, SOPRA I PULSANTI) */
+        /* PALLINI DI AVANZAMENTO */
         #progress-dots-container {
             width: 100%;
             display: flex;
@@ -558,8 +558,8 @@
                 font-size: clamp(3rem, 15vw, 6rem);
             }
             #progress-ring-container {
-                width: clamp(180px, 65vw, 300px);
-                height: clamp(180px, 65vw, 300px);
+                width: clamp(220px, 70vw, 320px);
+                height: clamp(220px, 70vw, 320px);
             }
             #phase-label {
                 font-size: 0.8rem;
@@ -582,8 +582,8 @@
 
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
-                width: clamp(320px, 60vw, 550px);
-                height: clamp(320px, 60vw, 550px);
+                width: clamp(340px, 65vw, 580px);
+                height: clamp(340px, 65vw, 580px);
             }
             #big-number {
                 font-size: clamp(6rem, 15vw, 10rem);
@@ -592,8 +592,8 @@
 
         @media (min-width: 1200px) {
             #progress-ring-container {
-                width: 650px;
-                height: 650px;
+                width: 680px;
+                height: 680px;
             }
             #big-number {
                 font-size: 14rem;
@@ -662,7 +662,6 @@
             </svg>
         </div>
 
-        <!-- PALLINI DI AVANZAMENTO (ORA FUORI DAI CERCHI) -->
         <div id="progress-dots-container">
             <div id="progress-dots"></div>
         </div>
@@ -672,7 +671,6 @@
             <button id="btn-skip-back" class="ctrl-btn">◀ IND.</button>
             <button id="btn-skip-forward" class="ctrl-btn">▶ AVV.</button>
             <button id="btn-stop" class="ctrl-btn">STOP</button>
-            <!-- Nascondo i vecchi -->
             <button id="btn-pause" style="display:none;"></button>
             <button id="btn-skip" style="display:none;"></button>
             <button id="btn-reset" style="display:none;"></button>
@@ -749,8 +747,9 @@
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             }
 
+            // Funzione per il suono (freq e durata personalizzabili)
             function playBeep(freq, duration) {
-                freq = freq || 1200;
+                freq = freq || 800;
                 duration = duration || 80;
                 try {
                     initAudio();
@@ -768,6 +767,7 @@
                 } catch (e) {}
             }
 
+            // Countdown tick: suono GRAVE (800Hz)
             function playCountdownTick(seconds) {
                 playBeep(800, 80);
             }
@@ -955,7 +955,7 @@
             newPresetName.addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomPreset(newPresetName
                     .value); });
 
-            // === UI UPDATE (pallini ora disegnati nel container esterno) ===
+            // === UI UPDATE ===
             function updateDots() {
                 var total = timerState.totalRounds || 1;
                 var done = timerState.currentRound;
@@ -1056,6 +1056,7 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
+                        // Il primo lavoro parte con il suono ACUTO (1200Hz) grazie a startWorkPhase()
                         startWorkPhase();
                         return;
                     }
@@ -1154,7 +1155,8 @@
             }
 
             function startWorkPhase() {
-                playBeep(800, 80);
+                // === SUONO ACUTO PER TUTTI I LAVORI (primo e successivi) ===
+                playBeep(1200, 80);
                 stopTimer();
                 timerState.status = 'work';
                 timerState.currentRound += 1;
@@ -1518,7 +1520,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - pallini spostati fuori dai cerchi');
+            console.log('✅ PT Timer - countdown 800Hz, lavoro 1200Hz (acuto)');
         });
     </script>
 </body>
