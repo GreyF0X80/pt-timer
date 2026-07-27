@@ -354,7 +354,7 @@
             margin: 2px 0 4px 0;
         }
 
-        /* ANELLI CONCENTRICI - INGRANDITI SU IPHONE */
+        /* ANELLI CONCENTRICI - INGRANDITI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
@@ -747,7 +747,7 @@
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             }
 
-            // Funzione per il suono (freq e durata personalizzabili)
+            // Funzione base per generare suoni
             function playBeep(freq, duration) {
                 freq = freq || 800;
                 duration = duration || 80;
@@ -767,7 +767,7 @@
                 } catch (e) {}
             }
 
-            // Countdown tick: suono GRAVE (800Hz)
+            // COUNTDOWN: suono GRAVE (800Hz)
             function playCountdownTick(seconds) {
                 playBeep(800, 80);
             }
@@ -781,6 +781,7 @@
                 }
             }
 
+            // GONG di fine lavoro
             function playGong() {
                 try {
                     initAudio();
@@ -799,11 +800,13 @@
                 } catch (e) {}
             }
 
+            // EXTRA alert
             function playExtraAlert() {
                 playBeep(600, 150);
                 setTimeout(function() { playBeep(900, 150); }, 180);
             }
 
+            // Metronome tick (se attivato)
             function playTickMetronome() { playBeep(1200, 30); }
 
             function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
@@ -1056,7 +1059,10 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
-                        // Il primo lavoro parte con il suono ACUTO (1200Hz) grazie a startWorkPhase()
+                        // Primo lavoro: suono acuto con un piccolo ritardo per separarlo dall'ultimo bip del countdown
+                        setTimeout(function() {
+                            playBeep(1200, 80);
+                        }, 100);
                         startWorkPhase();
                         return;
                     }
@@ -1100,7 +1106,8 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
-                        playBeep(880, 300);
+                        // Fine recupero: suono ACUTO (uguale al lavoro)
+                        playBeep(1200, 80);
                         vibrate([200, 100, 200]);
                         var shouldTriggerExtra = (settings.extraEvery > 0) &&
                             (timerState.currentRound % settings.extraEvery === 0) &&
@@ -1155,8 +1162,8 @@
             }
 
             function startWorkPhase() {
-                // === SUONO ACUTO PER TUTTI I LAVORI (primo e successivi) ===
-                playBeep(1200, 80);
+                // Il suono del lavoro viene generato dal countdown (primo) o dal recupero (successivi)
+                // Qui non c'è più playBeep, per evitare sovrapposizioni
                 stopTimer();
                 timerState.status = 'work';
                 timerState.currentRound += 1;
@@ -1322,7 +1329,7 @@
                         }
                     }
                 } else if (s === 'rest') {
-                    playBeep(880, 200);
+                    playBeep(1200, 80);
                     vibrate([100]);
                     startWorkPhase();
                 } else if (s === 'extra') {
@@ -1520,7 +1527,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - countdown 800Hz, lavoro 1200Hz (acuto)');
+            console.log('✅ PT Timer - suono lavoro acuto (1200Hz) separato dal countdown');
         });
     </script>
 </body>
