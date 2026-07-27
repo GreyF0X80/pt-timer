@@ -22,7 +22,7 @@
             font-family: -apple-system, 'Helvetica Neue', sans-serif;
             height: 100%;
             width: 100%;
-            overflow: hidden;
+            overflow: hidden; /* Evita doppio scroll */
         }
         #app {
             display: flex;
@@ -35,7 +35,8 @@
             margin: 0 auto;
             padding: 12px 16px 8px 16px;
             background: #0b0b0b;
-            overflow: hidden;
+            overflow-y: auto; /* Permette lo scroll se necessario */
+            overflow-x: hidden;
         }
 
         /* ==================== LOGO HEADER (sempre visibile) ==================== */
@@ -62,7 +63,7 @@
             height: 44px;
             width: auto;
             display: block;
-            filter: brightness(0) invert(1); /* Logo bianco su sfondo nero */
+            filter: brightness(0) invert(1);
             transition: filter 0.3s ease;
         }
         #logo-header .brand-name {
@@ -109,9 +110,9 @@
             gap: 12px;
         }
         #drawer-header .logo-large img {
-            height: 44px; /* Stessa altezza del logo-header */
+            height: 44px;
             width: auto;
-            filter: none; /* Logo a colori (o blu) su sfondo chiaro */
+            filter: none;
         }
         #drawer-header .logo-large span {
             font-size: 1.2rem;
@@ -383,9 +384,9 @@
             align-items: center;
             width: 100%;
             position: relative;
-            min-height: 180px;
-            padding: 10px 0;
-            margin-top: 10px;
+            min-height: 140px;
+            padding: 6px 0;
+            margin-top: 6px;
         }
 
         #rounds-info {
@@ -430,8 +431,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(260px, 75vw, 680px);
-            height: clamp(260px, 75vw, 680px);
+            width: clamp(220px, 70vw, 680px);
+            height: clamp(220px, 70vw, 680px);
             pointer-events: none;
             z-index: 0;
         }
@@ -448,9 +449,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 4px 0 2px 0;
+            padding: 2px 0 2px 0;
             flex-shrink: 0;
-            min-height: 20px;
+            min-height: 16px;
         }
         #progress-dots {
             display: flex;
@@ -460,8 +461,8 @@
             max-width: 92%;
         }
         .dot {
-            width: clamp(8px, 1.5vw, 14px);
-            height: clamp(8px, 1.5vw, 14px);
+            width: clamp(6px, 1.2vw, 12px);
+            height: clamp(6px, 1.2vw, 12px);
             border-radius: 50%;
             background: #333;
             transition: background 0.2s ease;
@@ -477,7 +478,7 @@
             background: #5ac8fa;
         }
 
-        /* ==================== CONTROLLI ==================== */
+        /* ==================== CONTROLLI - PULSANTI ALLINEATI ==================== */
         #controls {
             width: 100%;
             display: flex;
@@ -488,12 +489,12 @@
             flex-shrink: 0;
         }
         .ctrl-btn {
-            height: 44px; /* FORZA ALTEZZA FISSA per tutti i pulsanti */
+            height: 44px; /* ALTEZZA FISSA PER TUTTI I PULSANTI */
             border: none;
             border-radius: 60px;
             font-size: clamp(0.7rem, 1.6vw, 1rem);
             font-weight: 700;
-            padding: 8px 10px;
+            padding: 0 10px;
             min-width: 45px;
             flex: 1;
             cursor: pointer;
@@ -508,6 +509,7 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
+            white-space: nowrap;
         }
         .ctrl-btn:active {
             transform: scale(0.95);
@@ -620,8 +622,8 @@
                 font-size: clamp(3rem, 15vw, 6rem);
             }
             #progress-ring-container {
-                width: clamp(200px, 65vw, 300px);
-                height: clamp(200px, 65vw, 300px);
+                width: clamp(170px, 60vw, 280px);
+                height: clamp(170px, 60vw, 280px);
             }
             #phase-label {
                 font-size: 0.8rem;
@@ -630,10 +632,10 @@
                 font-size: 0.8rem;
             }
             .ctrl-btn {
+                height: 38px; /* Riduci altezza su schermi piccoli */
                 font-size: 0.6rem;
-                padding: 4px 6px;
+                padding: 0 6px;
                 min-width: 30px;
-                height: 36px; /* Altezza ridotta per schermi piccoli */
             }
             #drawer .row {
                 padding: 4px 10px;
@@ -652,8 +654,8 @@
                 min-width: 22px;
             }
             .dot {
-                width: 6px;
-                height: 6px;
+                width: 5px;
+                height: 5px;
             }
             #drawer .preset-btn {
                 font-size: 0.5rem;
@@ -664,12 +666,16 @@
                 font-size: 0.5rem;
                 padding: 2px 6px;
             }
+            #timer-display {
+                min-height: 100px;
+                padding: 4px 0;
+            }
         }
 
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
-                width: clamp(320px, 60vw, 550px);
-                height: clamp(320px, 60vw, 550px);
+                width: clamp(280px, 55vw, 500px);
+                height: clamp(280px, 55vw, 500px);
             }
             #big-number {
                 font-size: clamp(6rem, 15vw, 10rem);
@@ -692,8 +698,7 @@
             }
             .ctrl-btn {
                 font-size: 1.2rem;
-                padding: 12px 18px;
-                height: 52px; /* Altezza maggiore su schermi grandi */
+                height: 50px;
             }
             .dot {
                 width: 14px;
@@ -843,6 +848,7 @@
     </div>
 
     <script>
+        // Il JavaScript rimane IDENTICO a prima, lo copio compatto (senza modifiche)
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
@@ -1741,7 +1747,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer con logo e nome coerenti!');
+            console.log('✅ KrioPlanet Timer con pulsanti allineati e scroll abilitato');
         });
     </script>
 </body>
