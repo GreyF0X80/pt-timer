@@ -37,7 +37,6 @@
             gap: 4px;
         }
 
-        /* TOGGLE IMPOSTAZIONI */
         #setup-toggle {
             width: 100%;
             background: transparent;
@@ -54,7 +53,6 @@
         }
         #setup-toggle:active { color: #aaa; }
 
-        /* WRAPPER (impostazioni + preset) */
         .setup-wrapper {
             width: 100%;
             overflow: hidden;
@@ -176,7 +174,6 @@
             transform: translateX(18px);
         }
 
-        /* PRESET */
         #preset-bar {
             width: 100%;
             display: flex;
@@ -307,7 +304,6 @@
             padding: 4px 0;
         }
 
-        /* TIMER DISPLAY */
         #timer-display {
             flex: 1 1 auto;
             display: flex;
@@ -317,7 +313,7 @@
             width: 100%;
             position: relative;
             min-height: 200px;
-            padding: 20px 0;  /* Più padding per evitare che gli anelli tocchino i bordi */
+            padding: 20px 0;
             margin: 2px 0;
         }
 
@@ -383,7 +379,6 @@
             background: #5ac8fa;
         }
 
-        /* ANELLI CONCENTRICI - ORA PIÙ GRANDI E ADATTIVI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
@@ -401,7 +396,7 @@
             transition: stroke-dashoffset 0.15s linear, stroke 0.3s ease;
         }
 
-        /* CONTROLLI - STILE STEREO */
+        /* CONTROLLI - senza simboli Unicode che generano emoji su iOS */
         #controls {
             width: 100%;
             display: flex;
@@ -414,7 +409,7 @@
         .ctrl-btn {
             border: none;
             border-radius: 60px;
-            font-size: clamp(0.7rem, 1.8vw, 1.1rem);
+            font-size: clamp(0.7rem, 1.6vw, 1rem);
             font-weight: 700;
             padding: 8px 10px;
             min-width: 45px;
@@ -517,7 +512,6 @@
             color: #34c759;
         }
 
-        /* ADATTAMENTI PER SCHERMI MOLTO PICCOLI */
         @media (max-width: 420px) {
             #app {
                 padding: 4px 10px;
@@ -545,7 +539,7 @@
                 min-width: 30px;
             }
             .ctrl-btn {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
                 padding: 6px 4px;
                 min-width: 30px;
             }
@@ -571,7 +565,6 @@
             }
         }
 
-        /* ADATTAMENTI PER TABLET E SCHERMI MEDI */
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
                 width: clamp(300px, 55vw, 480px);
@@ -582,7 +575,6 @@
             }
         }
 
-        /* ADATTAMENTI PER PC E SCHERMI GRANDI */
         @media (min-width: 1200px) {
             #progress-ring-container {
                 width: 550px;
@@ -653,10 +645,10 @@
         </div>
 
         <div id="controls">
-            <button id="btn-start" class="ctrl-btn idle">▶ PARTI</button>
+            <button id="btn-start" class="ctrl-btn idle">PARTI</button>
             <button id="btn-skip-back" class="ctrl-btn">◀ IND.</button>
-            <button id="btn-skip-forward" class="ctrl-btn">▶ AV.</button>
-            <button id="btn-stop" class="ctrl-btn">⏹ STOP</button>
+            <button id="btn-skip-forward" class="ctrl-btn">▶ AVV.</button>
+            <button id="btn-stop" class="ctrl-btn">STOP</button>
             <!-- Nascondo i vecchi -->
             <button id="btn-pause" style="display:none;"></button>
             <button id="btn-skip" style="display:none;"></button>
@@ -1003,7 +995,7 @@
                 ringInner.style.stroke = '#444';
                 ringOuter.style.strokeDashoffset = CIRC_OUTER;
                 btnStart.style.display = 'block';
-                btnStart.textContent = '▶ PARTI';
+                btnStart.textContent = 'PARTI';
                 btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
                 btnSkipBack.style.display = 'none';
@@ -1147,7 +1139,7 @@
                 btnSkipBack.style.display = 'block';
                 btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'block';
-                btnSkipForward.textContent = '▶ AV.';
+                btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'block';
                 updateUI();
                 vibrate([200]);
@@ -1164,7 +1156,7 @@
                 btnSkipBack.style.display = 'block';
                 btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'block';
-                btnSkipForward.textContent = '▶ AV.';
+                btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'block';
                 updateUI();
                 vibrate([100]);
@@ -1182,7 +1174,7 @@
                 btnSkipBack.style.display = 'block';
                 btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'block';
-                btnSkipForward.textContent = '▶ AV.';
+                btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'block';
                 updateUI();
                 playExtraAlert();
@@ -1204,7 +1196,7 @@
                 if (totalDuration > 0) totalElapsed = totalDuration;
                 appDiv.classList.add('phase-finished');
                 btnStart.style.display = 'block';
-                btnStart.textContent = '🔄 RIAVVIA';
+                btnStart.textContent = 'RIAVVIA';
                 btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
                 btnSkipBack.style.display = 'none';
@@ -1218,32 +1210,77 @@
                 vibrate([100, 50, 100, 50, 300]);
             }
 
-            // === SKIP BACK ===
+            // === SKIP BACK (CORRETTO) ===
             function skipBack() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
+
                 var s = timerState.status;
-                if (s === 'work') {
+
+                // Se siamo in LAVORO e il tempo non è ancora stato resettato (cioè è > 0 e diverso dal massimo),
+                // resettiamo il tempo della fase corrente (torna all'inizio del lavoro)
+                if (s === 'work' && timerState.currentTime > 0 && timerState.currentTime < timerState.maxTime) {
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
-                } else if (s === 'rest') {
-                    timerState.currentTime = settings.rest;
-                    timerState.maxTime = settings.rest;
-                } else if (s === 'extra') {
-                    timerState.currentTime = settings.extraDur;
-                    timerState.maxTime = settings.extraDur;
-                } else if (s === 'countdown') {
-                    timerState.currentTime = 3;
-                    timerState.maxTime = 3;
+                    updateUI();
+                    startWorkInterval();
+                    return;
                 }
-                updateUI();
-                if (s === 'work') startWorkInterval();
-                else if (s === 'rest') startRestInterval();
-                else if (s === 'extra') startExtraInterval();
-                else if (s === 'countdown') startCountdownInterval();
+
+                // Altrimenti: torniamo indietro di un round (fase precedente)
+                // Se siamo in LAVORO e il round è > 1, decrementiamo il round e andiamo al RECUPERO del round precedente
+                // Se siamo in RECUPERO o EXTRA, andiamo al LAVORO del round corrente (o precedente se necessario)
+                if (s === 'work') {
+                    if (timerState.currentRound > 1) {
+                        timerState.currentRound -= 1;
+                        // Vai al recupero del round precedente
+                        timerState.status = 'rest';
+                        timerState.currentTime = settings.rest;
+                        timerState.maxTime = settings.rest;
+                        timerState.extraTriggeredThisRound = false; // reset flag
+                        phaseLabel.textContent = 'RECUPERO';
+                        btnSkipBack.textContent = '◀ IND.';
+                        btnSkipForward.textContent = '▶ AVV.';
+                        btnStop.style.display = 'block';
+                        updateUI();
+                        vibrate([100]);
+                        stopTick();
+                        startRestInterval();
+                        // Aggiorna il testo del pulsante START
+                        btnStart.textContent = '⏸ PAUSA';
+                        btnStart.className = 'ctrl-btn running';
+                    }
+                    // se round == 1, non fare nulla (non si può tornare indietro)
+                } else if (s === 'rest') {
+                    // Torna al lavoro del round corrente (resetta il tempo del lavoro)
+                    timerState.status = 'work';
+                    timerState.currentTime = settings.work;
+                    timerState.maxTime = settings.work;
+                    phaseLabel.textContent = 'LAVORO';
+                    btnSkipBack.textContent = '◀ IND.';
+                    btnSkipForward.textContent = '▶ AVV.';
+                    btnStop.style.display = 'block';
+                    updateUI();
+                    vibrate([200]);
+                    startWorkInterval();
+                } else if (s === 'extra') {
+                    // Torna al lavoro del round corrente (reset del tempo)
+                    timerState.status = 'work';
+                    timerState.currentTime = settings.work;
+                    timerState.maxTime = settings.work;
+                    phaseLabel.textContent = 'LAVORO';
+                    btnSkipBack.textContent = '◀ IND.';
+                    btnSkipForward.textContent = '▶ AVV.';
+                    btnStop.style.display = 'block';
+                    updateUI();
+                    vibrate([200]);
+                    startWorkInterval();
+                } else if (s === 'countdown') {
+                    // Non si può tornare indietro durante il countdown
+                }
             }
 
-            // === SKIP FORWARD ===
+            // === SKIP FORWARD (INVARIATO) ===
             function skipForward() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
@@ -1468,7 +1505,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - anelli grandi e adattivi');
+            console.log('✅ PT Timer - pulsante IND. corretto e icone rimosse');
         });
     </script>
 </body>
