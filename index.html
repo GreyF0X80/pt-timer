@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>PT Timer Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        html, body { background: #0b0b0b; color: white; font-family: -apple-system, 'Helvetica Neue', sans-serif; height: 100%; width: 100%; overflow: hidden; }
+        #app { display: flex; flex-direction: column; justify-content: space-between; align-items: center; height: 100vh; width: 100vw; max-width: 950px; margin: 0 auto; padding: 6px 16px; background: #0b0b0b; }
+        #setup-toggle { width: 100%; background: transparent; border: none; color: #666; font-size: 0.65rem; font-weight: 600; text-align: center; padding: 2px 0 4px 0; cursor: pointer; letter-spacing: 2px; transition: color 0.2s ease; flex-shrink: 0; }
+        #setup-toggle:active { color: #aaa; }
+        .setup-wrapper { width: 100%; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1); max-height: 800px; flex-shrink: 0; }
+        .setup-wrapper.collapsed { max-height: 0 !important; }
+        .setup-wrapper.collapsed #setup, .setup-wrapper.collapsed #preset-bar, .setup-wrapper.collapsed #custom-presets-section { display: none; }
+        #setup { width: 100%; display: flex; flex-direction: column; gap: 3px; padding-bottom: 4px; }
+        .row { display: flex; justify-content: space-between; align-items: center; background: #1c1c1e; padding: 2px 12px; border-radius: 60px; }
+        .row label { font-size: 0.7rem; font-weight: 600; color: #aaa; min-width: 45px; }
+        .row .controls { display: flex; align-items: center; gap: 6px; }
+        .row .controls button { background: #2c2c2e; border: none; color: white; width: 24px; height: 24px; border-radius: 24px; font-size: 0.9rem; font-weight: 300; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; box-shadow: 0 2px 0 #000; transition: 0.05s linear; }
+        .row .controls button:active { background: #3a3a3c; transform: scale(0.92); }
+        .row .controls span { font-size: 1rem; font-weight: 700; min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; }
+        .extra-label { font-size: 0.6rem; color: #666; min-width: 20px; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; background: #1c1c1e; padding: 2px 16px 2px 14px; border-radius: 60px; }
+        .toggle-row label { font-size: 0.7rem; font-weight: 600; color: #aaa; display: flex; align-items: center; gap: 4px; }
+        .switch { position: relative; width: 36px; height: 20px; background: #333; border-radius: 20px; cursor: pointer; transition: background 0.2s; touch-action: manipulation; flex-shrink: 0; }
+        .switch.active { background: #34c759; }
+        .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s; }
+        .switch.active::after { transform: translateX(16px); }
+        #preset-bar { width: 100%; display: flex; justify-content: space-between; gap: 3px; padding-bottom: 3px; flex-wrap: wrap; }
+        .preset-btn { flex: 1; background: #1c1c1e; border: 1px solid #333; color: #ccc; padding: 3px 0; border-radius: 30px; font-size: 0.55rem; font-weight: 700; text-align: center; cursor: pointer; touch-action: manipulation; transition: 0.1s ease; letter-spacing: 0.3px; min-width: 35px; }
+        .preset-btn:active { background: #2c2c2e; transform: scale(0.95); }
+        .preset-btn.active { border-color: #34c759; color: #34c759; background: #1a2a1a; }
+        .preset-btn.save-btn { border-color: #ffcc00; color: #ffcc00; background: #2a2a1a; }
+        .preset-btn.custom-btn { border-color: #5ac8fa; color: #5ac8fa; background: #1a2a3a; }
+        .preset-btn.delete-btn { border-color: #ff3b30; color: #ff3b30; background: #2a1a1a; flex: 0.2; min-width: 18px; font-size: 0.5rem; }
+        #custom-presets-section { width: 100%; display: flex; flex-wrap: wrap; gap: 3px; padding-bottom: 3px; border-top: 1px solid #222; padding-top: 4px; margin-top: 2px; }
+        #custom-presets-section .label-custom { font-size: 0.5rem; color: #555; font-weight: 600; letter-spacing: 1px; width: 100%; margin-bottom: 1px; }
+        .custom-preset-wrapper { display: flex; align-items: center; gap: 2px; flex: 1; min-width: 45px; }
+        .custom-preset-wrapper .preset-btn { flex: 1; }
+        .custom-preset-wrapper .delete-btn { flex: 0.2; min-width: 16px; font-size: 0.45rem; background: #1c1c1e; border: 1px solid #333; color: #ff3b30; border-radius: 30px; text-align: center; cursor: pointer; touch-action: manipulation; padding: 3px 0; transition: 0.1s ease; }
+        .custom-preset-wrapper .delete-btn:active { background: #2a1a1a; transform: scale(0.95); }
+        #new-preset-area { display: flex; align-items: center; gap: 3px; width: 100%; margin-top: 2px; }
+        #new-preset-area input { flex: 1; background: #1c1c1e; border: 1px solid #333; border-radius: 30px; padding: 3px 8px; color: white; font-size: 0.6rem; outline: none; min-width: 50px; }
+        #new-preset-area input::placeholder { color: #555; }
+        #new-preset-area input:focus { border-color: #5ac8fa; }
+        #new-preset-area .preset-btn { flex: 0.3; min-width: 35px; font-size: 0.55rem; padding: 3px 0; }
+
+        #timer-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; position: relative; min-height: 200px; padding: 0; margin: 4px 0; }
+        #rounds-info { font-size: 1.3rem; font-weight: 500; color: #888; letter-spacing: 1px; z-index: 2; margin-bottom: 2px; }
+        #big-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: clamp(5rem, 30vw, 16rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; transition: color 0.15s ease; color: #ffffff; letter-spacing: 2px; z-index: 2; margin: 0; padding: 0; text-align: center; width: 100%; }
+        #phase-label { position: relative; z-index: 2; font-size: 1.5rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; color: #888; transition: color 0.15s ease; text-align: center; margin-top: calc(clamp(5rem, 30vw, 16rem) + 0.8rem); padding: 0 10px; pointer-events: none; }
+        #progress-dots { display: flex; justify-content: center; gap: 5px; z-index: 2; flex-wrap: wrap; max-width: 90%; margin-top: 8px; position: relative; }
+        .dot { width: 11px; height: 11px; border-radius: 50%; background: #333; transition: background 0.2s ease; }
+        .dot.done { background: #34c759; }
+        .dot.current { background: #ffcc00; }
+        .dot.extra-dot { background: #5ac8fa; }
+
+        #progress-ring-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(75vw, 550px);
+            height: min(75vw, 550px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        #ring-outer-bg { transition: none; }
+        #ring-outer { transition: stroke-dashoffset 0.15s linear; stroke: #ff6a00; }
+        #ring-inner { transition: stroke 0.3s ease, stroke-dashoffset 0.1s linear; }
+
+        #controls { width: 100%; display: flex; justify-content: center; gap: 8px; padding-bottom: 4px; flex-wrap: wrap; flex-shrink: 0; }
+        .ctrl-btn { border: none; border-radius: 60px; font-size: 1rem; font-weight: 700; padding: 10px 12px; min-width: 60px; flex: 1; cursor: pointer; touch-action: manipulation; transition: 0.05s linear; background: #2c2c2e; color: white; box-shadow: 0 4px 0 #000; letter-spacing: 1px; }
+        .ctrl-btn:active { transform: scale(0.95); }
+        #btn-start { background: #34c759; color: #000; box-shadow: 0 4px 0 #1e7a34; }
+        #btn-pause { background: #ffcc00; color: #000; box-shadow: 0 4px 0 #b38f00; display: none; }
+        #btn-skip { background: #5ac8fa; color: #000; box-shadow: 0 4px 0 #1a7a9a; display: none; flex: 0.5; min-width: 50px; font-size: 0.9rem; }
+        #btn-reset { background: #ff3b30; color: #fff; box-shadow: 0 4px 0 #8a1e1a; flex: 0.4; min-width: 45px; font-size: 1.2rem; }
+
+        .phase-work #big-number, .phase-work #phase-label { color: #34c759; }
+        .phase-rest #big-number, .phase-rest #phase-label { color: #ff6b6b; }
+        .phase-rest-warning #big-number, .phase-rest-warning #phase-label { color: #ffcc00; }
+        .phase-extra #big-number, .phase-extra #phase-label { color: #5ac8fa; }
+        .phase-countdown #big-number, .phase-countdown #phase-label { color: #ffcc00; }
+        .phase-finished #big-number, .phase-finished #phase-label { color: #34c759; }
+
+        @media (max-width: 480px) {
+            #big-number { font-size: clamp(3.5rem, 20vw, 7rem); }
+            #phase-label { font-size: 1rem; margin-top: calc(clamp(3.5rem, 20vw, 7rem) + 0.4rem); }
+            #progress-ring-container { width: min(70vw, 220px); height: min(70vw, 220px); }
+            .dot { width: 7px; height: 7px; }
+            .ctrl-btn { font-size: 0.7rem; padding: 6px 4px; min-width: 35px; }
+            #rounds-info { font-size: 0.9rem; }
+        }
+        @media (min-width: 1200px) {
+            #progress-ring-container { width: 600px; height: 600px; }
+            #big-number { font-size: 18rem; }
+            #phase-label { font-size: 2rem; margin-top: calc(18rem + 1rem); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <button id="setup-toggle">▼ NASCONDI IMPOSTAZIONI</button>
+
+        <div class="setup-wrapper" id="setupWrapper">
+            <div id="setup">
+                <div class="row"><label>⏱ Lavoro</label><div class="controls"><button id="dec-work">−</button><span id="val-work">30</span><button id="inc-work">+</button></div></div>
+                <div class="row"><label>🧘 Recupero</label><div class="controls"><button id="dec-rest">−</button><span id="val-rest">15</span><button id="inc-rest">+</button></div></div>
+                <div class="row"><label>🔁 Giri</label><div class="controls"><button id="dec-rounds">−</button><span id="val-rounds">12</span><button id="inc-rounds">+</button></div></div>
+                <div class="row"><label>🚴 Extra ogni</label><div class="controls"><button id="dec-extra-every">−</button><span id="val-extra-every">4</span><button id="inc-extra-every">+</button><span class="extra-label">giri</span></div></div>
+                <div class="row"><label>⏳ Durata Extra</label><div class="controls"><button id="dec-extra-dur">−</button><span id="val-extra-dur">60</span><button id="inc-extra-dur">+</button></div></div>
+                <div class="toggle-row"><label>🎵 Tick</label><div class="switch" id="tick-toggle"></div></div>
+            </div>
+
+            <div id="preset-bar">
+                <div class="preset-btn" data-preset="hiit">🔥 HIIT</div>
+                <div class="preset-btn" data-preset="tabata">⚡ TABATA</div>
+                <div class="preset-btn" data-preset="forza">🏋️ FORZA</div>
+                <div class="preset-btn" data-preset="cardio">🚴 CARDIO</div>
+            </div>
+
+            <div id="custom-presets-section">
+                <div class="label-custom">📁 I MIEI PRESET</div>
+                <div id="custom-presets-list" style="display: flex; flex-wrap: wrap; gap: 3px; width: 100%;"></div>
+                <div id="new-preset-area">
+                    <input type="text" id="new-preset-name" placeholder="Nome..." maxlength="20">
+                    <button class="preset-btn save-btn" id="btn-add-custom">➕ NUOVO</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="timer-display">
+            <div id="rounds-info">Giro 0 / 12</div>
+            <div id="big-number">30</div>
+            <div id="phase-label">PRONTO</div>
+            <div id="progress-dots"></div>
+            <svg id="progress-ring-container" viewBox="0 0 100 100">
+                <circle id="ring-outer-bg" cx="50" cy="50" r="46" fill="none" stroke="#2a2a2a" stroke-width="6" />
+                <circle id="ring-outer" cx="50" cy="50" r="46" fill="none" stroke="#ff6a00" stroke-width="6"
+                    stroke-linecap="round" stroke-dasharray="289.03" stroke-dashoffset="289.03"
+                    transform="rotate(-90 50 50)" />
+                <circle id="ring-inner-bg" cx="50" cy="50" r="39" fill="none" stroke="#222222" stroke-width="5" />
+                <circle id="ring-inner" cx="50" cy="50" r="39" fill="none" stroke="#34c759" stroke-width="5"
+                    stroke-linecap="round" stroke-dasharray="245.04" stroke-dashoffset="245.04"
+                    transform="rotate(-90 50 50)" />
+            </svg>
+        </div>
+
+        <div id="controls">
+            <button id="btn-start" class="ctrl-btn">▶ PARTI</button>
+            <button id="btn-pause" class="ctrl-btn">⏸ PAUSA</button>
+            <button id="btn-skip" class="ctrl-btn">⏭ SALTA</button>
+            <button id="btn-reset" class="ctrl-btn">↺</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            "use strict";
+
+            // === TEST: verifica che il JS sia partito ===
+            alert('✅ PT Timer avviato! (se vedi questo messaggio, il JavaScript funziona)');
+
+            // === RIFERIMENTI DOM ===
+            var valWork = document.getElementById('val-work');
+            var valRest = document.getElementById('val-rest');
+            var valRounds = document.getElementById('val-rounds');
+            var valExtraEvery = document.getElementById('val-extra-every');
+            var valExtraDur = document.getElementById('val-extra-dur');
+            var bigNumber = document.getElementById('big-number');
+            var phaseLabel = document.getElementById('phase-label');
+            var roundsInfo = document.getElementById('rounds-info');
+            var ringInner = document.getElementById('ring-inner');
+            var ringOuter = document.getElementById('ring-outer');
+            var progressDots = document.getElementById('progress-dots');
+            var appDiv = document.getElementById('app');
+            var btnStart = document.getElementById('btn-start');
+            var btnPause = document.getElementById('btn-pause');
+            var btnSkip = document.getElementById('btn-skip');
+            var btnReset = document.getElementById('btn-reset');
+            var presetBtns = document.querySelectorAll('.preset-btn[data-preset]');
+            var setupToggle = document.getElementById('setup-toggle');
+            var setupWrapper = document.getElementById('setupWrapper');
+            var tickToggle = document.getElementById('tick-toggle');
+            var customList = document.getElementById('custom-presets-list');
+            var newPresetName = document.getElementById('new-preset-name');
+            var btnAddCustom = document.getElementById('btn-add-custom');
+
+            var CIRC_OUTER = 289.03;
+            var CIRC_INNER = 245.04;
+
+            // === PRESETS ===
+            var PRESETS = {
+                hiit: { work: 30, rest: 15, rounds: 12, extraEvery: 4, extraDur: 60 },
+                tabata: { work: 20, rest: 10, rounds: 8, extraEvery: 0, extraDur: 60 },
+                forza: { work: 45, rest: 90, rounds: 6, extraEvery: 3, extraDur: 90 },
+                cardio: { work: 60, rest: 20, rounds: 10, extraEvery: 5, extraDur: 120 }
+            };
+
+            // === STATO GLOBALE ===
+            var settings = { work: 30, rest: 15, rounds: 12, extraEvery: 4, extraDur: 60 };
+            var tickEnabled = false;
+            var tickInterval = null;
+            var totalDuration = 0;
+            var totalElapsed = 0;
+            var lastCountdownSecond = -1;
+
+            var timerState = {
+                status: 'idle',
+                currentRound: 0,
+                totalRounds: settings.rounds,
+                currentTime: settings.work,
+                maxTime: settings.work,
+                timerInterval: null,
+                isPaused: false,
+                extraTriggeredThisRound: false
+            };
+
+            // === AUDIO ===
+            var audioCtx = null;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        // se fallisce, silenzioso
+                    }
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
+            function playBeep(freq, duration, type) {
+                freq = freq || 800;
+                duration = duration || 200;
+                type = type || 'sine';
+                try {
+                    initAudio();
+                    if (!audioCtx) return;
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + duration / 1000);
+                } catch (e) {}
+            }
+
+            function playCountdownTick(seconds) {
+                if (seconds === 1) {
+                    playBeep(1200, 150);
+                } else {
+                    playBeep(800, 80);
+                }
+            }
+
+            function handleCountdownTick() {
+                if (timerState.isPaused) return;
+                var seconds = Math.ceil(timerState.currentTime);
+                if (seconds >= 1 && seconds <= 3 && seconds !== lastCountdownSecond) {
+                    lastCountdownSecond = seconds;
+                    playCountdownTick(seconds);
+                }
+            }
+
+            function playGong() {
+                try {
+                    initAudio();
+                    if (!audioCtx) return;
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.6);
+                    gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.7);
+                } catch (e) {}
+            }
+
+            function playExtraAlert() {
+                playBeep(600, 150);
+                setTimeout(function() { playBeep(900, 150); }, 180);
+            }
+
+            function playTickMetronome() {
+                playBeep(1200, 30);
+            }
+
+            function vibrate(pattern) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(pattern);
+                }
+            }
+
+            // === CALCOLO DURATA TOTALE ===
+            function calculateTotalDuration() {
+                var work = settings.work;
+                var rest = settings.rest;
+                var rounds = settings.rounds;
+                var extraEvery = settings.extraEvery;
+                var extraDur = settings.extraDur;
+                if (rounds === 0) return 0;
+                var total = (work + rest) * rounds;
+                if (extraEvery > 0) {
+                    var numExtras = Math.floor(rounds / extraEvery);
+                    total += extraDur * numExtras;
+                }
+                total += 3;
+                return total;
+            }
+
+            // === TICK METRONOME ===
+            function loadTickState() {
+                try {
+                    var saved = localStorage.getItem('pt_timer_tick');
+                    tickEnabled = (saved === 'true');
+                } catch (e) {
+                    tickEnabled = false;
+                }
+                if (tickEnabled) {
+                    tickToggle.classList.add('active');
+                } else {
+                    tickToggle.classList.remove('active');
+                }
+            }
+
+            function saveTickState() {
+                try {
+                    localStorage.setItem('pt_timer_tick', tickEnabled ? 'true' : 'false');
+                } catch (e) {}
+            }
+
+            tickToggle.addEventListener('click', function() {
+                tickEnabled = !tickEnabled;
+                if (tickEnabled) {
+                    this.classList.add('active');
+                } else {
+                    this.classList.remove('active');
+                }
+                saveTickState();
+                if (timerState.status === 'work' && !timerState.isPaused) {
+                    startTick();
+                } else {
+                    stopTick();
+                }
+            });
+
+            function startTick() {
+                stopTick();
+                if (!tickEnabled || timerState.status !== 'work' || timerState.isPaused) return;
+                tickInterval = setInterval(function() {
+                    if (timerState.status === 'work' && !timerState.isPaused) {
+                        playTickMetronome();
+                    } else {
+                        stopTick();
+                    }
+                }, 1000);
+            }
+
+            function stopTick() {
+                if (tickInterval) {
+                    clearInterval(tickInterval);
+                    tickInterval = null;
+                }
+            }
+
+            // === SETUP TOGGLE ===
+            var isSetupVisible = true;
+
+            function toggleSetup() {
+                isSetupVisible = !isSetupVisible;
+                if (isSetupVisible) {
+                    setupWrapper.classList.remove('collapsed');
+                    setupToggle.textContent = '▼ NASCONDI IMPOSTAZIONI';
+                } else {
+                    setupWrapper.classList.add('collapsed');
+                    setupToggle.textContent = '▲ MOSTRA IMPOSTAZIONI';
+                }
+            }
+            setupToggle.addEventListener('click', toggleSetup);
+
+            // === CUSTOM PRESETS ===
+            var customPresets = [];
+
+            function loadCustomPresets() {
+                try {
+                    var data = localStorage.getItem('pt_timer_custom_presets');
+                    if (data) {
+                        customPresets = JSON.parse(data);
+                    } else {
+                        customPresets = [];
+                    }
+                } catch (e) {
+                    customPresets = [];
+                }
+                renderCustomPresets();
+            }
+
+            function saveCustomPresets() {
+                try {
+                    localStorage.setItem('pt_timer_custom_presets', JSON.stringify(customPresets));
+                } catch (e) {}
+                renderCustomPresets();
+            }
+
+            function renderCustomPresets() {
+                customList.innerHTML = '';
+                for (var i = 0; i < customPresets.length; i++) {
+                    var p = customPresets[i];
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'custom-preset-wrapper';
+                    var btn = document.createElement('div');
+                    btn.className = 'preset-btn custom-btn';
+                    var name = p.name;
+                    if (name.length > 10) {
+                        name = name.substring(0, 10) + '…';
+                    }
+                    btn.textContent = name;
+                    btn.title = p.name;
+                    (function(idx) {
+                        btn.addEventListener('click', function() {
+                            loadCustomPresetByIndex(idx);
+                        });
+                    })(i);
+                    var del = document.createElement('div');
+                    del.className = 'delete-btn';
+                    del.textContent = '✖';
+                    (function(idx) {
+                        del.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (confirm('Eliminare "' + p.name + '"?')) {
+                                customPresets.splice(idx, 1);
+                                saveCustomPresets();
+                            }
+                        });
+                    })(i);
+                    wrapper.appendChild(btn);
+                    wrapper.appendChild(del);
+                    customList.appendChild(wrapper);
+                }
+                var area = document.getElementById('new-preset-area');
+                if (customPresets.length >= 5) {
+                    area.style.display = 'none';
+                } else {
+                    area.style.display = 'flex';
+                }
+            }
+
+            function addCustomPreset(name) {
+                if (customPresets.length >= 5) {
+                    alert('Hai già 5 preset!');
+                    return;
+                }
+                if (!name || name.trim() === '') {
+                    alert('Inserisci un nome.');
+                    return;
+                }
+                var current = {
+                    work: parseInt(valWork.textContent, 10) || 30,
+                    rest: parseInt(valRest.textContent, 10) || 15,
+                    rounds: parseInt(valRounds.textContent, 10) || 8,
+                    extraEvery: parseInt(valExtraEvery.textContent, 10) || 0,
+                    extraDur: parseInt(valExtraDur.textContent, 10) || 60
+                };
+                customPresets.push({
+                    name: name.trim(),
+                    work: current.work,
+                    rest: current.rest,
+                    rounds: current.rounds,
+                    extraEvery: current.extraEvery,
+                    extraDur: current.extraDur
+                });
+                saveCustomPresets();
+                newPresetName.value = '';
+                alert('✅ Preset "' + name.trim() + '" salvato!');
+            }
+
+            function loadCustomPresetByIndex(idx) {
+                if (timerState.status !== 'idle' && timerState.status !== 'finished') return;
+                var p = customPresets[idx];
+                if (!p) return;
+                settings.work = p.work;
+                settings.rest = p.rest;
+                settings.rounds = p.rounds;
+                settings.extraEvery = p.extraEvery;
+                settings.extraDur = p.extraDur;
+                syncUIFromSettings();
+                timerState.totalRounds = settings.rounds;
+                timerState.currentRound = 0;
+                timerState.currentTime = settings.work;
+                timerState.maxTime = settings.work;
+                resetUI();
+                updateUI();
+                for (var i = 0; i < presetBtns.length; i++) {
+                    presetBtns[i].classList.remove('active');
+                }
+                var customBtns = document.querySelectorAll('.custom-preset-wrapper .preset-btn');
+                for (var j = 0; j < customBtns.length; j++) {
+                    customBtns[j].classList.remove('active');
+                }
+                var wrappers = document.querySelectorAll('.custom-preset-wrapper');
+                if (wrappers[idx]) {
+                    var btn = wrappers[idx].querySelector('.preset-btn');
+                    if (btn) btn.classList.add('active');
+                }
+            }
+
+            btnAddCustom.addEventListener('click', function() {
+                addCustomPreset(newPresetName.value);
+            });
+            newPresetName.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomPreset(newPresetName.value);
+                }
+            });
+
+            // === UI UPDATE ===
+            function updateDots() {
+                var total = timerState.totalRounds || 1;
+                var done = timerState.currentRound;
+                progressDots.innerHTML = '';
+                for (var i = 1; i <= total; i++) {
+                    var dot = document.createElement('span');
+                    dot.className = 'dot';
+                    if (i < done) {
+                        dot.classList.add('done');
+                    } else if (i === done && timerState.status !== 'idle' && timerState.status !== 'finished') {
+                        if (timerState.status === 'extra') {
+                            dot.classList.add('extra-dot');
+                        } else {
+                            dot.classList.add('current');
+                        }
+                    }
+                    progressDots.appendChild(dot);
+                }
+            }
+
+            function updateUI() {
+                bigNumber.textContent = Math.ceil(timerState.currentTime);
+                roundsInfo.textContent = 'Giro ' + timerState.currentRound + ' / ' + timerState.totalRounds;
+                updateDots();
+
+                // Anello interno
+                var progressInner = (timerState.maxTime > 0) ? (timerState.currentTime / timerState.maxTime) * 100 : 0;
+                var offsetInner = CIRC_INNER - (progressInner / 100) * CIRC_INNER;
+                ringInner.style.strokeDashoffset = offsetInner;
+
+                var color = '#444';
+                var phaseClass = '';
+                var isRestWarning = (timerState.status === 'rest' && timerState.currentTime <= 3 && timerState.currentTime > 0);
+                if (timerState.status === 'work') {
+                    color = '#34c759';
+                    phaseClass = 'phase-work';
+                } else if (timerState.status === 'rest') {
+                    if (isRestWarning) {
+                        color = '#ffcc00';
+                        phaseClass = 'phase-rest-warning';
+                    } else {
+                        color = '#ff6b6b';
+                        phaseClass = 'phase-rest';
+                    }
+                } else if (timerState.status === 'extra') {
+                    color = '#5ac8fa';
+                    phaseClass = 'phase-extra';
+                } else if (timerState.status === 'countdown') {
+                    color = '#ffcc00';
+                    phaseClass = 'phase-countdown';
+                } else if (timerState.status === 'finished') {
+                    color = '#34c759';
+                    phaseClass = 'phase-finished';
+                }
+                ringInner.style.stroke = color;
+
+                // Rimuovi tutte le classi di fase
+                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
+                if (phaseClass) {
+                    appDiv.classList.add(phaseClass);
+                }
+
+                // Anello esterno
+                if (totalDuration > 0) {
+                    var progressOuter = (totalElapsed / totalDuration) * 100;
+                    if (progressOuter > 100) progressOuter = 100;
+                    var offsetOuter = CIRC_OUTER - (progressOuter / 100) * CIRC_OUTER;
+                    ringOuter.style.strokeDashoffset = offsetOuter;
+                } else {
+                    ringOuter.style.strokeDashoffset = CIRC_OUTER;
+                }
+            }
+
+            function resetUI() {
+                bigNumber.textContent = settings.work;
+                roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
+                phaseLabel.textContent = 'PRONTO';
+                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
+                ringInner.style.strokeDashoffset = CIRC_INNER;
+                ringInner.style.stroke = '#444';
+                ringOuter.style.strokeDashoffset = CIRC_OUTER;
+                btnStart.style.display = 'block';
+                btnStart.textContent = '▶ PARTI';
+                btnPause.style.display = 'none';
+                btnSkip.style.display = 'none';
+                timerState.currentRound = 0;
+                timerState.totalRounds = settings.rounds;
+                totalElapsed = 0;
+                lastCountdownSecond = -1;
+                updateDots();
+                stopTick();
+            }
+
+            // === FUNZIONI DI INTERVALLO ===
+            function stopTimer() {
+                if (timerState.timerInterval) {
+                    clearInterval(timerState.timerInterval);
+                    timerState.timerInterval = null;
+                }
+                stopTick();
+            }
+
+            function startCountdownInterval() {
+                stopTimer();
+                lastCountdownSecond = -1;
+                timerState.timerInterval = setInterval(function() {
+                    if (timerState.isPaused) return;
+                    timerState.currentTime -= 0.1;
+                    totalElapsed += 0.1;
+                    handleCountdownTick();
+                    if (timerState.currentTime <= 0) {
+                        timerState.currentTime = 0;
+                        updateUI();
+                        startWorkPhase();
+                        return;
+                    }
+                    updateUI();
+                }, 100);
+            }
+
+            function startWorkInterval() {
+                stopTimer();
+                lastCountdownSecond = -1;
+                timerState.timerInterval = setInterval(function() {
+                    if (timerState.isPaused) return;
+                    timerState.currentTime -= 0.1;
+                    totalElapsed += 0.1;
+                    handleCountdownTick();
+                    if (timerState.currentTime <= 0) {
+                        timerState.currentTime = 0;
+                        updateUI();
+                        playGong();
+                        vibrate([300, 100, 300]);
+                        if (timerState.currentRound >= timerState.totalRounds) {
+                            finishWorkout();
+                        } else {
+                            startRestPhase();
+                        }
+                        return;
+                    }
+                    updateUI();
+                }, 100);
+                if (tickEnabled) startTick();
+            }
+
+            function startRestInterval() {
+                stopTimer();
+                lastCountdownSecond = -1;
+                timerState.timerInterval = setInterval(function() {
+                    if (timerState.isPaused) return;
+                    timerState.currentTime -= 0.1;
+                    totalElapsed += 0.1;
+                    handleCountdownTick();
+                    if (timerState.currentTime <= 0) {
+                        timerState.currentTime = 0;
+                        updateUI();
+                        playBeep(880, 300);
+                        vibrate([200, 100, 200]);
+                        var shouldTriggerExtra = (settings.extraEvery > 0) &&
+                            (timerState.currentRound % settings.extraEvery === 0) &&
+                            !timerState.extraTriggeredThisRound &&
+                            (timerState.currentRound < timerState.totalRounds);
+                        if (shouldTriggerExtra) {
+                            timerState.extraTriggeredThisRound = true;
+                            startExtraPhase();
+                        } else {
+                            startWorkPhase();
+                        }
+                        return;
+                    }
+                    updateUI();
+                }, 100);
+            }
+
+            function startExtraInterval() {
+                stopTimer();
+                lastCountdownSecond = -1;
+                timerState.timerInterval = setInterval(function() {
+                    if (timerState.isPaused) return;
+                    timerState.currentTime -= 0.1;
+                    totalElapsed += 0.1;
+                    handleCountdownTick();
+                    if (timerState.currentTime <= 0) {
+                        timerState.currentTime = 0;
+                        updateUI();
+                        playBeep(1000, 400);
+                        vibrate([300]);
+                        startWorkPhase();
+                        return;
+                    }
+                    updateUI();
+                }, 100);
+            }
+
+            // === FUNZIONI DI AVVIO FASI ===
+            function startCountdown() {
+                stopTimer();
+                timerState.status = 'countdown';
+                timerState.currentTime = 3;
+                timerState.maxTime = 3;
+                timerState.isPaused = false;
+                phaseLabel.textContent = 'PARTENZA';
+                btnSkip.style.display = 'none';
+                updateUI();
+                vibrate([100, 100, 100]);
+                startCountdownInterval();
+            }
+
+            function startWorkPhase() {
+                stopTimer();
+                timerState.status = 'work';
+                timerState.currentRound += 1;
+                timerState.currentTime = settings.work;
+                timerState.maxTime = settings.work;
+                timerState.isPaused = false;
+                timerState.extraTriggeredThisRound = false;
+                phaseLabel.textContent = 'LAVORO';
+                btnSkip.style.display = 'block';
+                btnSkip.textContent = '⏭ SALTA';
+                updateUI();
+                vibrate([200]);
+                startWorkInterval();
+            }
+
+            function startRestPhase() {
+                stopTimer();
+                timerState.status = 'rest';
+                timerState.currentTime = settings.rest;
+                timerState.maxTime = settings.rest;
+                timerState.isPaused = false;
+                phaseLabel.textContent = 'RECUPERO';
+                btnSkip.style.display = 'block';
+                btnSkip.textContent = '⏭ SALTA';
+                updateUI();
+                vibrate([100]);
+                stopTick();
+                startRestInterval();
+            }
+
+            function startExtraPhase() {
+                stopTimer();
+                timerState.status = 'extra';
+                timerState.currentTime = settings.extraDur;
+                timerState.maxTime = settings.extraDur;
+                timerState.isPaused = false;
+                phaseLabel.textContent = 'EXTRA ATTIVO';
+                btnSkip.style.display = 'block';
+                btnSkip.textContent = '⏭ SALTA';
+                updateUI();
+                playExtraAlert();
+                vibrate([100, 50, 100]);
+                stopTick();
+                startExtraInterval();
+            }
+
+            function finishWorkout() {
+                stopTimer();
+                timerState.status = 'finished';
+                timerState.currentTime = 0;
+                phaseLabel.textContent = 'COMPLETATO';
+                bigNumber.textContent = '0';
+                roundsInfo.textContent = 'Giro ' + timerState.currentRound + ' / ' + timerState.totalRounds;
+                ringInner.style.strokeDashoffset = 0;
+                ringInner.style.stroke = '#34c759';
+                ringOuter.style.strokeDashoffset = 0;
+                if (totalDuration > 0) totalElapsed = totalDuration;
+                appDiv.classList.add('phase-finished');
+                btnStart.style.display = 'block';
+                btnStart.textContent = '🔄 RIAVVIA';
+                btnPause.style.display = 'none';
+                btnSkip.style.display = 'none';
+                updateDots();
+                stopTick();
+                setTimeout(function() { playBeep(523, 200); }, 100);
+                setTimeout(function() { playBeep(659, 200); }, 300);
+                setTimeout(function() { playBeep(784, 400); }, 500);
+                vibrate([100, 50, 100, 50, 300]);
+            }
+
+            // === SKIP PHASE ===
+            function skipPhase() {
+                if (timerState.status === 'idle' || timerState.status === 'finished') return;
+                if (timerState.isPaused) return;
+                var remaining = timerState.currentTime;
+                if (remaining > 0) totalElapsed += remaining;
+                stopTimer();
+                stopTick();
+                var s = timerState.status;
+                if (s === 'work') {
+                    playGong();
+                    vibrate([200]);
+                    if (timerState.currentRound >= timerState.totalRounds) {
+                        finishWorkout();
+                    } else {
+                        var shouldTriggerExtra = (settings.extraEvery > 0) &&
+                            (timerState.currentRound % settings.extraEvery === 0) &&
+                            !timerState.extraTriggeredThisRound &&
+                            (timerState.currentRound < timerState.totalRounds);
+                        if (shouldTriggerExtra) {
+                            timerState.extraTriggeredThisRound = true;
+                            startExtraPhase();
+                        } else {
+                            startRestPhase();
+                        }
+                    }
+                } else if (s === 'rest') {
+                    playBeep(880, 200);
+                    vibrate([100]);
+                    startWorkPhase();
+                } else if (s === 'extra') {
+                    playBeep(1000, 200);
+                    vibrate([100]);
+                    startWorkPhase();
+                } else if (s === 'countdown') {
+                    startWorkPhase();
+                }
+                updateUI();
+            }
+
+            // === PAUSA / RIPRENDI ===
+            function togglePause() {
+                if (timerState.status === 'idle' || timerState.status === 'finished') return;
+                if (timerState.isPaused) {
+                    timerState.isPaused = false;
+                    btnPause.textContent = '⏸ PAUSA';
+                    var s = timerState.status;
+                    if (s === 'work') startWorkInterval();
+                    else if (s === 'rest') startRestInterval();
+                    else if (s === 'extra') startExtraInterval();
+                    else if (s === 'countdown') startCountdownInterval();
+                } else {
+                    timerState.isPaused = true;
+                    btnPause.textContent = '▶ RIPRENDI';
+                    stopTimer();
+                    stopTick();
+                    updateUI();
+                }
+            }
+
+            // === RESET ===
+            function resetAll() {
+                stopTimer();
+                stopTick();
+                timerState.status = 'idle';
+                timerState.currentRound = 0;
+                timerState.isPaused = false;
+                timerState.extraTriggeredThisRound = false;
+                timerState.currentTime = settings.work;
+                timerState.maxTime = settings.work;
+                timerState.totalRounds = settings.rounds;
+                totalElapsed = 0;
+                lastCountdownSecond = -1;
+                syncUIFromSettings();
+                resetUI();
+                updateUI();
+            }
+
+            // === HELPER PER SETTINGS ===
+            function syncUIFromSettings() {
+                valWork.textContent = settings.work;
+                valRest.textContent = settings.rest;
+                valRounds.textContent = settings.rounds;
+                valExtraEvery.textContent = settings.extraEvery;
+                valExtraDur.textContent = settings.extraDur;
+            }
+
+            function loadSettingsIntoState() {
+                settings.work = parseInt(valWork.textContent, 10) || 30;
+                settings.rest = parseInt(valRest.textContent, 10) || 15;
+                settings.rounds = parseInt(valRounds.textContent, 10) || 8;
+                settings.extraEvery = parseInt(valExtraEvery.textContent, 10) || 0;
+                settings.extraDur = parseInt(valExtraDur.textContent, 10) || 60;
+                timerState.totalRounds = settings.rounds;
+                if (timerState.status === 'idle' || timerState.status === 'finished') {
+                    timerState.currentTime = settings.work;
+                    timerState.maxTime = settings.work;
+                    bigNumber.textContent = settings.work;
+                    roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
+                    ringInner.style.strokeDashoffset = CIRC_INNER;
+                    ringInner.style.stroke = '#444';
+                    ringOuter.style.strokeDashoffset = CIRC_OUTER;
+                    phaseLabel.textContent = 'PRONTO';
+                    appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
+                    updateDots();
+                }
+            }
+
+            // === PRESET STANDARD ===
+            function loadPreset(name) {
+                if (timerState.status !== 'idle' && timerState.status !== 'finished') return;
+                var preset = PRESETS[name];
+                if (!preset) return;
+                settings.work = preset.work;
+                settings.rest = preset.rest;
+                settings.rounds = preset.rounds;
+                settings.extraEvery = preset.extraEvery;
+                settings.extraDur = preset.extraDur;
+                syncUIFromSettings();
+                timerState.totalRounds = settings.rounds;
+                timerState.currentRound = 0;
+                timerState.currentTime = settings.work;
+                timerState.maxTime = settings.work;
+                totalElapsed = 0;
+                resetUI();
+                updateUI();
+                for (var i = 0; i < presetBtns.length; i++) {
+                    presetBtns[i].classList.remove('active');
+                }
+                var target = document.querySelector('.preset-btn[data-preset="' + name + '"]');
+                if (target) target.classList.add('active');
+                var customBtns = document.querySelectorAll('.custom-preset-wrapper .preset-btn');
+                for (var j = 0; j < customBtns.length; j++) {
+                    customBtns[j].classList.remove('active');
+                }
+            }
+
+            // === START ===
+            function handleStart() {
+                initAudio();
+                if (timerState.status === 'idle' || timerState.status === 'finished') {
+                    loadSettingsIntoState();
+                    totalDuration = calculateTotalDuration();
+                    if (totalDuration <= 0) totalDuration = 1;
+                    totalElapsed = 0;
+                    timerState.currentRound = 0;
+                    timerState.extraTriggeredThisRound = false;
+                    timerState.currentTime = settings.work;
+                    timerState.maxTime = settings.work;
+                    btnStart.style.display = 'none';
+                    btnPause.style.display = 'block';
+                    btnPause.textContent = '⏸ PAUSA';
+                    btnSkip.style.display = 'none';
+                    startCountdown();
+                } else {
+                    togglePause();
+                }
+            }
+
+            // === ADJUST VALUE ===
+            function isRunning() {
+                return timerState.status !== 'idle' && timerState.status !== 'finished';
+            }
+
+            function adjustValue(el, delta, min, max) {
+                if (isRunning()) return;
+                var val = parseInt(el.textContent, 10) + delta;
+                if (val < min) val = min;
+                if (val > max) val = max;
+                el.textContent = val;
+                if (timerState.status === 'idle' || timerState.status === 'finished') {
+                    loadSettingsIntoState();
+                    resetUI();
+                    updateUI();
+                }
+            }
+
+            // === EVENTI ===
+            document.getElementById('dec-work').addEventListener('click', function() { adjustValue(valWork, -1, 3, 300); });
+            document.getElementById('inc-work').addEventListener('click', function() { adjustValue(valWork, 1, 3, 300); });
+            document.getElementById('dec-rest').addEventListener('click', function() { adjustValue(valRest, -1, 1, 300); });
+            document.getElementById('inc-rest').addEventListener('click', function() { adjustValue(valRest, 1, 1, 300); });
+            document.getElementById('dec-rounds').addEventListener('click', function() { adjustValue(valRounds, -1, 1, 99); });
+            document.getElementById('inc-rounds').addEventListener('click', function() { adjustValue(valRounds, 1, 1, 99); });
+            document.getElementById('dec-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, -1, 0, 99); });
+            document.getElementById('inc-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, 1, 0, 99); });
+            document.getElementById('dec-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, -1, 5, 600); });
+            document.getElementById('inc-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, 1, 5, 600); });
+
+            for (var i = 0; i < presetBtns.length; i++) {
+                (function(btn) {
+                    btn.addEventListener('click', function() {
+                        loadPreset(btn.getAttribute('data-preset'));
+                    });
+                })(presetBtns[i]);
+            }
+
+            btnStart.addEventListener('click', handleStart);
+            btnPause.addEventListener('click', togglePause);
+            btnSkip.addEventListener('click', skipPhase);
+            btnReset.addEventListener('click', resetAll);
+
+            // === WAKE LOCK ===
+            if ('wakeLock' in navigator) {
+                var wl = null;
+                var reqLock = function() {
+                    try {
+                        navigator.wakeLock.request('screen').then(function(lock) {
+                            wl = lock;
+                        }).catch(function() {});
+                    } catch (e) {}
+                };
+                reqLock();
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible' && wl === null) {
+                        reqLock();
+                    }
+                });
+            }
+
+            // === INIT ===
+            loadTickState();
+            loadCustomPresets();
+            loadPreset('hiit');
+            console.log('✅ PT Timer avviato correttamente su iPhone!');
+        });
+    </script>
+</body>
+</html>
