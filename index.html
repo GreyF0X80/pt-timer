@@ -8,7 +8,6 @@
     <meta name="theme-color" content="#000000">
     <title>PT Timer Pro</title>
     <style>
-        /* RESET E IMPOSTAZIONI GLOBALI */
         * {
             margin: 0;
             padding: 0;
@@ -384,14 +383,14 @@
             background: #5ac8fa;
         }
 
-        /* ANELLI CONCENTRICI */
+        /* ANELLI CONCENTRICI - RIDOTTI PER EVITARE SOVRAPPOSIZIONI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: min(70vw, 500px);
-            height: min(70vw, 500px);
+            width: min(60vw, 380px);
+            height: min(60vw, 380px);
             pointer-events: none;
             z-index: 0;
         }
@@ -402,7 +401,7 @@
             transition: stroke-dashoffset 0.15s linear, stroke 0.3s ease;
         }
 
-        /* CONTROLLI - STILE STEREO CON 5 PULSANTI */
+        /* CONTROLLI - NUOVI PULSANTI STILE STEREO */
         #controls {
             width: 100%;
             display: flex;
@@ -417,8 +416,8 @@
             border-radius: 60px;
             font-size: clamp(0.7rem, 1.8vw, 1.1rem);
             font-weight: 700;
-            padding: 10px 8px;
-            min-width: 48px;
+            padding: 8px 10px;
+            min-width: 45px;
             flex: 1;
             cursor: pointer;
             touch-action: manipulation;
@@ -426,9 +425,12 @@
             background: #2c2c2e;
             color: white;
             box-shadow: 0 4px 0 #000;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             text-align: center;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         .ctrl-btn:active {
             transform: scale(0.95);
@@ -438,37 +440,55 @@
             color: #000;
             box-shadow: 0 4px 0 #1e7a34;
         }
+        #btn-start.idle {
+            background: #34c759;
+            color: #000;
+        }
+        #btn-start.running {
+            background: #ffcc00;
+            color: #000;
+            box-shadow: 0 4px 0 #b38f00;
+        }
         #btn-pause {
             background: #ffcc00;
             color: #000;
             box-shadow: 0 4px 0 #b38f00;
             display: none;
         }
-        #btn-rewind {
+        #btn-skip-back {
             background: #5ac8fa;
             color: #000;
             box-shadow: 0 4px 0 #1a7a9a;
             display: none;
+            flex: 0.5;
+            min-width: 45px;
+            font-size: 0.9rem;
         }
-        #btn-forward {
+        #btn-skip-forward {
             background: #5ac8fa;
             color: #000;
             box-shadow: 0 4px 0 #1a7a9a;
             display: none;
+            flex: 0.5;
+            min-width: 45px;
+            font-size: 0.9rem;
         }
         #btn-stop {
-            background: #ff6b6b;
-            color: #000;
-            box-shadow: 0 4px 0 #8a1e1a;
-            display: none;
-        }
-        #btn-reset {
             background: #ff3b30;
             color: #fff;
             box-shadow: 0 4px 0 #8a1e1a;
+            display: none;
             flex: 0.4;
-            min-width: 45px;
-            font-size: 1.2rem;
+            min-width: 40px;
+            font-size: 1rem;
+        }
+
+        /* Nascondo il vecchio btn-skip e btn-reset (li sostituisco) */
+        #btn-skip {
+            display: none !important;
+        }
+        #btn-reset {
+            display: none !important;
         }
 
         /* COLORI DINAMICI */
@@ -497,7 +517,7 @@
             color: #34c759;
         }
 
-        /* ADATTAMENTI PER SCHERMI PICCOLI */
+        /* ADATTAMENTI PER SCHERMI MOLTO PICCOLI */
         @media (max-width: 420px) {
             #app {
                 padding: 4px 10px;
@@ -525,9 +545,9 @@
                 min-width: 30px;
             }
             .ctrl-btn {
-                font-size: 0.55rem;
+                font-size: 0.65rem;
                 padding: 6px 4px;
-                min-width: 32px;
+                min-width: 30px;
             }
             #big-number {
                 font-size: clamp(3rem, 15vw, 6rem);
@@ -551,20 +571,22 @@
             }
         }
 
+        /* ADATTAMENTI PER TABLET E SCHERMI MEDI */
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
-                width: min(50vw, 380px);
-                height: min(50vw, 380px);
+                width: min(50vw, 320px);
+                height: min(50vw, 320px);
             }
             #big-number {
                 font-size: clamp(6rem, 15vw, 10rem);
             }
         }
 
+        /* ADATTAMENTI PER PC E SCHERMI GRANDI */
         @media (min-width: 1200px) {
             #progress-ring-container {
-                width: 500px;
-                height: 500px;
+                width: 420px;
+                height: 420px;
             }
             #big-number {
                 font-size: 14rem;
@@ -577,7 +599,7 @@
             }
             .ctrl-btn {
                 font-size: 1.2rem;
-                padding: 14px 18px;
+                padding: 12px 18px;
             }
         }
     </style>
@@ -631,12 +653,14 @@
         </div>
 
         <div id="controls">
-            <button id="btn-start" class="ctrl-btn">▶ PARTI</button>
-            <button id="btn-pause" class="ctrl-btn">⏸ PAUSA</button>
-            <button id="btn-rewind" class="ctrl-btn">◀◀ IND.</button>
-            <button id="btn-forward" class="ctrl-btn">▶▶ AV.</button>
+            <button id="btn-start" class="ctrl-btn idle">▶ PARTI</button>
+            <button id="btn-skip-back" class="ctrl-btn">◀ IND.</button>
+            <button id="btn-skip-forward" class="ctrl-btn">▶ AV.</button>
             <button id="btn-stop" class="ctrl-btn">⏹ STOP</button>
-            <button id="btn-reset" class="ctrl-btn">↺</button>
+            <!-- Nascondo i vecchi pulsanti -->
+            <button id="btn-pause" style="display:none;"></button>
+            <button id="btn-skip" style="display:none;"></button>
+            <button id="btn-reset" style="display:none;"></button>
         </div>
     </div>
 
@@ -659,10 +683,9 @@
             var appDiv = document.getElementById('app');
             var btnStart = document.getElementById('btn-start');
             var btnPause = document.getElementById('btn-pause');
-            var btnRewind = document.getElementById('btn-rewind');
-            var btnForward = document.getElementById('btn-forward');
+            var btnSkipBack = document.getElementById('btn-skip-back');
+            var btnSkipForward = document.getElementById('btn-skip-forward');
             var btnStop = document.getElementById('btn-stop');
-            var btnReset = document.getElementById('btn-reset');
             var presetBtns = document.querySelectorAll('.preset-btn[data-preset]');
             var setupToggle = document.getElementById('setup-toggle');
             var setupWrapper = document.getElementById('setupWrapper');
@@ -731,7 +754,7 @@
             }
 
             function playCountdownTick(seconds) {
-                // Stesso suono secco per tutti i secondi del countdown (3, 2, 1)
+                // Stesso suono per tutti i secondi del countdown
                 playBeep(800, 80);
             }
 
@@ -982,9 +1005,10 @@
                 ringOuter.style.strokeDashoffset = CIRC_OUTER;
                 btnStart.style.display = 'block';
                 btnStart.textContent = '▶ PARTI';
+                btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
-                btnRewind.style.display = 'none';
-                btnForward.style.display = 'none';
+                btnSkipBack.style.display = 'none';
+                btnSkipForward.style.display = 'none';
                 btnStop.style.display = 'none';
                 timerState.currentRound = 0;
                 timerState.totalRounds = settings.rounds;
@@ -1014,6 +1038,8 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
+                        // Suono all'inizio del primo lavoro (dopo countdown)
+                        playBeep(800, 80);
                         startWorkPhase();
                         return;
                     }
@@ -1095,15 +1121,7 @@
                 }, 100);
             }
 
-            // === FUNZIONI DI AVVIO FASI (con gestione pulsanti) ===
-            function showControlButtons() {
-                btnStart.style.display = 'none';
-                btnPause.style.display = 'block';
-                btnRewind.style.display = 'block';
-                btnForward.style.display = 'block';
-                btnStop.style.display = 'block';
-            }
-
+            // === FUNZIONI DI AVVIO FASI ===
             function startCountdown() {
                 stopTimer();
                 timerState.status = 'countdown';
@@ -1111,9 +1129,9 @@
                 timerState.maxTime = 3;
                 timerState.isPaused = false;
                 phaseLabel.textContent = 'PARTENZA';
-                showControlButtons();
-                btnForward.style.display = 'none'; // non si può saltare durante il countdown
-                btnRewind.style.display = 'none';
+                btnSkipBack.style.display = 'none';
+                btnSkipForward.style.display = 'none';
+                btnStop.style.display = 'none';
                 updateUI();
                 vibrate([100, 100, 100]);
                 startCountdownInterval();
@@ -1128,7 +1146,11 @@
                 timerState.isPaused = false;
                 timerState.extraTriggeredThisRound = false;
                 phaseLabel.textContent = 'LAVORO';
-                showControlButtons();
+                btnSkipBack.style.display = 'block';
+                btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'block';
+                btnSkipForward.textContent = '▶ AV.';
+                btnStop.style.display = 'block';
                 updateUI();
                 vibrate([200]);
                 startWorkInterval();
@@ -1141,7 +1163,11 @@
                 timerState.maxTime = settings.rest;
                 timerState.isPaused = false;
                 phaseLabel.textContent = 'RECUPERO';
-                showControlButtons();
+                btnSkipBack.style.display = 'block';
+                btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'block';
+                btnSkipForward.textContent = '▶ AV.';
+                btnStop.style.display = 'block';
                 updateUI();
                 vibrate([100]);
                 stopTick();
@@ -1155,7 +1181,11 @@
                 timerState.maxTime = settings.extraDur;
                 timerState.isPaused = false;
                 phaseLabel.textContent = 'EXTRA ATTIVO';
-                showControlButtons();
+                btnSkipBack.style.display = 'block';
+                btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'block';
+                btnSkipForward.textContent = '▶ AV.';
+                btnStop.style.display = 'block';
                 updateUI();
                 playExtraAlert();
                 vibrate([100, 50, 100]);
@@ -1177,9 +1207,10 @@
                 appDiv.classList.add('phase-finished');
                 btnStart.style.display = 'block';
                 btnStart.textContent = '🔄 RIAVVIA';
+                btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
-                btnRewind.style.display = 'none';
-                btnForward.style.display = 'none';
+                btnSkipBack.style.display = 'none';
+                btnSkipForward.style.display = 'none';
                 btnStop.style.display = 'none';
                 updateDots();
                 stopTick();
@@ -1189,94 +1220,48 @@
                 vibrate([100, 50, 100, 50, 300]);
             }
 
-            // === FUNZIONI DI NAVIGAZIONE ===
-            // Funzione per tornare alla fase precedente
-            function goBack() {
+            // === SKIP BACK (RICOMINCIA FASE CORRENTE) ===
+            function skipBack() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
-                if (timerState.status === 'countdown') return; // non si può tornare indietro nel countdown
-
-                // Determina la fase precedente in base allo stato attuale
-                var currentStatus = timerState.status;
-                var currentRound = timerState.currentRound;
-
-                // Non si può tornare indietro se siamo al primo round e in lavoro o countdown
-                if (currentRound <= 1 && currentStatus === 'work') {
-                    return; // non si può tornare indietro oltre il primo lavoro
-                }
-
-                // Sottraiamo il tempo della fase corrente da totalElapsed
-                var remaining = timerState.currentTime;
-                if (remaining > 0) {
-                    totalElapsed -= remaining; // rimuoviamo il tempo non consumato
-                }
-
-                stopTimer();
-                stopTick();
-
-                // Decidiamo la fase di destinazione
-                if (currentStatus === 'work') {
-                    // Torna al recupero precedente (o extra)
-                    // Decrementiamo il round solo se si torna indietro di un ciclo completo
-                    // Ma se siamo in work, torniamo al rest precedente (che è dello stesso round)
-                    // Quindi non decrementiamo il round
-                    // Tuttavia, se il round è > 1, potremmo tornare al rest del round precedente?
-                    // Semplifichiamo: torniamo al rest precedente (se il round corrente > 1)
-                    if (currentRound > 1) {
-                        // torniamo al rest del round precedente
-                        timerState.currentRound = currentRound - 1;
-                        // controlliamo se c'era un extra prima di questo lavoro
-                        // (difficile da gestire, per semplicità torniamo al rest)
-                        startRestPhase();
-                        // Forziamo l'aggiornamento del display
-                        updateUI();
-                    } else {
-                        // se siamo al primo round, non facciamo nulla
-                        return;
-                    }
-                } else if (currentStatus === 'rest') {
-                    // Torna al lavoro precedente (stesso round)
-                    startWorkPhase();
-                    // correggiamo il round (perché startWorkPhase incrementa, quindi decrementiamo prima)
-                    timerState.currentRound = currentRound - 1;
-                    // Aggiorniamo il timer per evitare che parta da capo
+                // Ricomincia la fase corrente: resetta il timer al suo valore massimo
+                // (non cambia il round corrente)
+                var s = timerState.status;
+                if (s === 'work') {
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
-                    updateUI();
-                } else if (currentStatus === 'extra') {
-                    // Torna al rest precedente (stesso round)
-                    startRestPhase();
-                    // Correggiamo il round
-                    timerState.currentRound = currentRound;
-                    updateUI();
-                } else {
-                    return;
+                } else if (s === 'rest') {
+                    timerState.currentTime = settings.rest;
+                    timerState.maxTime = settings.rest;
+                } else if (s === 'extra') {
+                    timerState.currentTime = settings.extraDur;
+                    timerState.maxTime = settings.extraDur;
+                } else if (s === 'countdown') {
+                    timerState.currentTime = 3;
+                    timerState.maxTime = 3;
                 }
-
-                // Aggiorniamo totalElapsed per riflettere il nuovo stato (rimuoviamo il tempo della fase saltata)
-                // Poiché abbiamo già sottratto il remaining, ricalcoliamo totalElapsed in modo coerente
-                // (in pratica, totalElapsed è già stato corretto)
+                // Non modificare totalElapsed perché il tempo è già stato contato,
+                // ma se vogliamo che l'anello esterno tenga conto del "riavvolgimento",
+                // dovremmo sottrarre il tempo già trascorso della fase.
+                // Semplifichiamo: l'anello esterno non viene modificato.
                 updateUI();
+                // Ricomincia l'intervallo
+                if (s === 'work') startWorkInterval();
+                else if (s === 'rest') startRestInterval();
+                else if (s === 'extra') startExtraInterval();
+                else if (s === 'countdown') startCountdownInterval();
             }
 
-            // Funzione per saltare alla fase successiva (avanti)
-            function goForward() {
+            // === SKIP FORWARD (SALTA ALLA FASE SUCCESSIVA) ===
+            function skipForward() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
-                if (timerState.status === 'countdown') {
-                    // salta il countdown e va al lavoro
-                    startWorkPhase();
-                    return;
-                }
-
-                // Aggiungiamo il tempo rimanente della fase corrente a totalElapsed
+                // Aggiunge il tempo rimanente a totalElapsed per mantenere il progresso
                 var remaining = timerState.currentTime;
                 if (remaining > 0) totalElapsed += remaining;
-
                 stopTimer();
                 stopTick();
                 var s = timerState.status;
-
                 if (s === 'work') {
                     playGong();
                     vibrate([200]);
@@ -1302,83 +1287,14 @@
                     playBeep(1000, 200);
                     vibrate([100]);
                     startWorkPhase();
+                } else if (s === 'countdown') {
+                    startWorkPhase();
                 }
                 updateUI();
             }
 
-            // === PAUSA / RIPRENDI ===
-            function togglePause() {
-                if (timerState.status === 'idle' || timerState.status === 'finished') return;
-                if (timerState.isPaused) {
-                    timerState.isPaused = false;
-                    btnPause.textContent = '⏸ PAUSA';
-                    var s = timerState.status;
-                    if (s === 'work') startWorkInterval();
-                    else if (s === 'rest') startRestInterval();
-                    else if (s === 'extra') startExtraInterval();
-                    else if (s === 'countdown') startCountdownInterval();
-                } else {
-                    timerState.isPaused = true;
-                    btnPause.textContent = '▶ RIPRENDI';
-                    stopTimer();
-                    stopTick();
-                    updateUI();
-                }
-            }
-
-            // === STOP: ferma il timer e riporta all'inizio della fase corrente ===
-            function stopPhase() {
-                if (timerState.status === 'idle' || timerState.status === 'finished') return;
-                if (timerState.isPaused) {
-                    // se è in pausa, riporta all'inizio della fase senza riavviare
-                    timerState.isPaused = false;
-                    btnPause.textContent = '⏸ PAUSA';
-                }
-                stopTimer();
-                stopTick();
-                // Reimposta il tempo all'inizio della fase corrente
-                if (timerState.status === 'work') {
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    phaseLabel.textContent = 'LAVORO';
-                } else if (timerState.status === 'rest') {
-                    timerState.currentTime = settings.rest;
-                    timerState.maxTime = settings.rest;
-                    phaseLabel.textContent = 'RECUPERO';
-                } else if (timerState.status === 'extra') {
-                    timerState.currentTime = settings.extraDur;
-                    timerState.maxTime = settings.extraDur;
-                    phaseLabel.textContent = 'EXTRA ATTIVO';
-                } else if (timerState.status === 'countdown') {
-                    timerState.currentTime = 3;
-                    timerState.maxTime = 3;
-                    phaseLabel.textContent = 'PARTENZA';
-                }
-                // Ripristina i controlli
-                showControlButtons();
-                // Il timer è fermo, in attesa di play/pausa
-                // Non resettiamo totalElapsed perché il tempo già consumato rimane.
-                // Ma se vogliamo che "stop" resetti il tempo consumato di questa fase,
-                // dobbiamo sottrarre il tempo già consumato in questa fase da totalElapsed.
-                // (Per semplicità, non lo facciamo)
-                updateUI();
-                // Il pulsante play deve diventare "▶" e nascondere pausa?
-                // Decidiamo di mostrare "▶" e nascondere pausa, così l'utente può ripartire.
-                btnStart.style.display = 'block';
-                btnStart.textContent = '▶ RIPRENDI';
-                btnPause.style.display = 'none';
-                btnRewind.style.display = 'block';
-                btnForward.style.display = 'block';
-                btnStop.style.display = 'block';
-                // Il timer è fermo; se l'utente preme "▶", riparte dall'inizio della fase.
-                // Per gestire questo, impostiamo timerState.isPaused = true e poi usiamo togglePause per ripartire.
-                // Ma è più semplice: quando si preme "▶" (btnStart), se il timer è fermo, avvia la fase corrente.
-                // Quindi modifichiamo handleStart per gestire questo caso.
-                // Per ora, lasciamo che handleStart gestisca tutto.
-            }
-
-            // === RESET COMPLETO ===
-            function resetAll() {
+            // === STOP (RESET COMPLETO) ===
+            function stopAll() {
                 stopTimer();
                 stopTick();
                 timerState.status = 'idle';
@@ -1393,6 +1309,33 @@
                 syncUIFromSettings();
                 resetUI();
                 updateUI();
+            }
+
+            // === PAUSA / RIPRENDI ===
+            function togglePause() {
+                if (timerState.status === 'idle' || timerState.status === 'finished') return;
+                if (timerState.isPaused) {
+                    timerState.isPaused = false;
+                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.className = 'ctrl-btn running';
+                    var s = timerState.status;
+                    if (s === 'work') startWorkInterval();
+                    else if (s === 'rest') startRestInterval();
+                    else if (s === 'extra') startExtraInterval();
+                    else if (s === 'countdown') startCountdownInterval();
+                } else {
+                    timerState.isPaused = true;
+                    btnStart.textContent = '▶ RIPRENDI';
+                    btnStart.className = 'ctrl-btn idle';
+                    stopTimer();
+                    stopTick();
+                    updateUI();
+                }
+            }
+
+            // === RESET (usato solo da stopAll) ===
+            function resetAll() {
+                stopAll();
             }
 
             // === HELPER PER SETTINGS ===
@@ -1451,11 +1394,10 @@
                         'active'); });
             }
 
-            // === START / RIPRENDI ===
+            // === START ===
             function handleStart() {
                 initAudio();
                 if (timerState.status === 'idle' || timerState.status === 'finished') {
-                    // Nuovo avvio
                     loadSettingsIntoState();
                     totalDuration = calculateTotalDuration();
                     if (totalDuration <= 0) totalDuration = 1;
@@ -1464,26 +1406,12 @@
                     timerState.extraTriggeredThisRound = false;
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
-                    btnStart.style.display = 'none';
-                    btnPause.style.display = 'block';
-                    btnPause.textContent = '⏸ PAUSA';
-                    btnRewind.style.display = 'none'; // durante il countdown non si può tornare indietro
-                    btnForward.style.display = 'none';
-                    btnStop.style.display = 'block';
+                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.className = 'ctrl-btn running';
+                    btnSkipBack.style.display = 'none';
+                    btnSkipForward.style.display = 'none';
+                    btnStop.style.display = 'none';
                     startCountdown();
-                } else if (timerState.status !== 'idle' && timerState.status !== 'finished' && timerState.isPaused ===
-                    false && timerState.timerInterval === null) {
-                    // Caso: il timer è fermo (dopo uno stop) e si preme "▶" per ripartire dall'inizio della fase
-                    // Ripartiamo dal countdown o dalla fase corrente?
-                    // Per semplicità, ripartiamo dalla fase corrente (senza countdown)
-                    var s = timerState.status;
-                    if (s === 'work') startWorkInterval();
-                    else if (s === 'rest') startRestInterval();
-                    else if (s === 'extra') startExtraInterval();
-                    else if (s === 'countdown') startCountdownInterval();
-                    btnStart.style.display = 'none';
-                    btnPause.style.display = 'block';
-                    btnPause.textContent = '⏸ PAUSA';
                 } else {
                     togglePause();
                 }
@@ -1528,11 +1456,9 @@
             });
 
             btnStart.addEventListener('click', handleStart);
-            btnPause.addEventListener('click', togglePause);
-            btnRewind.addEventListener('click', goBack);
-            btnForward.addEventListener('click', goForward);
-            btnStop.addEventListener('click', stopPhase);
-            btnReset.addEventListener('click', resetAll);
+            btnSkipBack.addEventListener('click', skipBack);
+            btnSkipForward.addEventListener('click', skipForward);
+            btnStop.addEventListener('click', stopAll);
 
             // === WAKE LOCK ===
             if ('wakeLock' in navigator) {
@@ -1552,7 +1478,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - stereo controls: play, pause, stop, avanti, indietro');
+            console.log('✅ PT Timer - suoni corretti e nuovi controlli stereo');
         });
     </script>
 </body>
