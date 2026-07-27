@@ -462,7 +462,10 @@
             height: clamp(200px, 68vw, 650px);
             pointer-events: none;
             z-index: 0;
+            overflow: visible; /* Permette all'effetto bagliore di estendersi senza tagli */
+            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4)); /* Bagliore morbido e naturale sul viewBox intero */
         }
+        
         #ring-outer-bg,
         #ring-outer,
         #ring-inner-bg,
@@ -726,11 +729,11 @@
             <div id="rounds-info">Giro 0 / 12</div>
             <div id="big-number">30</div>
             <div id="phase-label">PRONTO</div>
-            <svg id="progress-ring-container" viewBox="0 0 100 100">
+            <svg id="progress-ring-container" viewBox="-6 -6 112 112">
                 <circle id="ring-outer-bg" cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" />
                 <circle id="ring-outer" cx="50" cy="50" r="46" fill="none" stroke="#00f0ff" stroke-width="5"
                     stroke-linecap="round" stroke-dasharray="289.03" stroke-dashoffset="289.03"
-                    transform="rotate(-90 50 50)" style="filter: drop-shadow(0px 0px 6px var(--primary-cyan));" />
+                    transform="rotate(-90 50 50)" />
                 <circle id="ring-inner-bg" cx="50" cy="50" r="39" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="5" />
                 <circle id="ring-inner" cx="50" cy="50" r="39" fill="none" stroke="#38ef7d" stroke-width="5"
                     stroke-linecap="round" stroke-dasharray="245.04" stroke-dashoffset="245.04"
@@ -759,7 +762,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
-            // OPZIONE A: FUNZIONE VIBRAZIONE APTICA PER FEEDBACK CONTINUO
+            // VIBRAZIONE APTICA PER FEEDBACK CONTINUO
             function triggerVibration(pattern) {
                 if (navigator.vibrate) {
                     navigator.vibrate(pattern);
@@ -1661,7 +1664,6 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer - Opzione A (Vibrazione continua) integrata con successo');
         });
     </script>
 </body>
