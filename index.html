@@ -125,8 +125,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             border-bottom: 1px solid rgba(0, 240, 255, 0.15);
         }
         #drawer-header .logo-large {
@@ -285,6 +285,47 @@
             transform: translateX(20px);
         }
 
+        /* SECTION SALVA PRESET DENTRO IL DRAWER */
+        .drawer-save-section {
+            margin-top: 14px;
+            background: rgba(0, 240, 255, 0.03);
+            border: 1px dashed rgba(0, 240, 255, 0.25);
+            border-radius: 14px;
+            padding: 12px;
+        }
+        .drawer-save-section input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.8rem;
+            outline: none;
+            margin-bottom: 8px;
+            user-select: text;
+        }
+        .drawer-save-section input:focus {
+            border-color: var(--primary-cyan);
+        }
+        .btn-save-drawer {
+            width: 100%;
+            background: var(--primary-cyan);
+            color: #000;
+            border: none;
+            padding: 8px 0;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .btn-save-drawer:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+
         #drawer #preset-bar {
             display: flex;
             flex-wrap: wrap;
@@ -292,20 +333,19 @@
             margin: 16px 0 10px 0;
         }
         #drawer .preset-btn {
-            flex: 1;
+            flex: 1 1 40%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: var(--text-main);
-            padding: 6px 0;
+            padding: 8px 0;
             border-radius: 30px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 600;
             text-align: center;
             cursor: pointer;
             touch-action: manipulation;
             transition: all 0.2s ease;
             letter-spacing: 0.5px;
-            min-width: 60px;
         }
         #drawer .preset-btn:active {
             transform: scale(0.95);
@@ -316,92 +356,192 @@
             background: var(--primary-cyan);
             box-shadow: 0 0 12px var(--glow-cyan);
         }
-        #drawer .preset-btn.save-btn {
-            border-color: var(--primary-cyan);
-            color: var(--primary-cyan);
-            background: rgba(0, 240, 255, 0.1);
-        }
-        #drawer .preset-btn.custom-btn {
-            border-color: rgba(0, 240, 255, 0.3);
-            color: var(--primary-cyan);
-            background: rgba(0, 240, 255, 0.05);
-        }
 
-        #drawer #custom-presets-section {
+        /* BOTTONE LIBRERIA WORKOUT */
+        #btn-open-library {
+            width: 100%;
             margin-top: 10px;
-        }
-        #drawer #custom-presets-section .label-custom {
-            font-size: 0.75rem;
-            color: var(--text-muted);
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 114, 255, 0.15));
+            border: 1px solid var(--primary-cyan);
+            border-radius: 12px;
+            color: #fff;
             font-weight: 600;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        #drawer .custom-preset-wrapper {
+            font-size: 0.85rem;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
-            flex: 1;
-            min-width: 60px;
-            margin-bottom: 6px;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        #drawer .custom-preset-wrapper .preset-btn {
+        #btn-open-library:active {
+            transform: scale(0.97);
+            background: rgba(0, 240, 255, 0.25);
+        }
+
+        /* ==================== MODALE LIBRERIA WORKOUT ==================== */
+        #library-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            background: rgba(5, 11, 20, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px 16px;
+        }
+        #library-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            color: var(--primary-cyan);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            max-width: 700px;
+            width: 100%;
+            margin: 16px auto 0 auto;
+            padding-right: 4px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .search-box input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+            user-select: text;
+        }
+        .search-box input:focus {
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 10px var(--glow-cyan);
+        }
+
+        .library-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .library-item {
+            background: rgba(15, 30, 46, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .library-item:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            background: rgba(15, 30, 46, 0.95);
+        }
+        .library-item-info {
             flex: 1;
         }
-        #drawer .custom-preset-wrapper .delete-btn {
-            flex: 0.2;
-            min-width: 24px;
-            font-size: 0.65rem;
-            background: rgba(255, 77, 109, 0.15);
+        .library-item-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .library-item-details {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .library-item-details span {
+            color: var(--primary-cyan);
+            font-weight: 600;
+        }
+        .library-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-action-load {
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-action-load:active {
+            background: var(--primary-cyan);
+            color: #000;
+        }
+        .btn-action-del {
+            background: rgba(255, 77, 109, 0.1);
             border: 1px solid var(--rest-red);
             color: var(--rest-red);
-            border-radius: 30px;
-            text-align: center;
-            cursor: pointer;
-            touch-action: manipulation;
-            padding: 6px 0;
-            transition: 0.15s ease;
-        }
-        #drawer .custom-preset-wrapper .delete-btn:active {
-            background: var(--rest-red);
-            color: white;
-            transform: scale(0.95);
-        }
-
-        #drawer #new-preset-area {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            width: 100%;
-            margin-top: 8px;
-        }
-        #drawer #new-preset-area input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 30px;
-            padding: 6px 14px;
-            color: #fff;
+            padding: 6px 10px;
+            border-radius: 20px;
             font-size: 0.75rem;
-            outline: none;
-            min-width: 60px;
+            cursor: pointer;
+            transition: 0.15s;
         }
-        #drawer #new-preset-area input::placeholder {
+        .btn-action-del:active {
+            background: var(--rest-red);
+            color: #fff;
+        }
+        .empty-library-msg {
+            text-align: center;
             color: var(--text-muted);
-        }
-        #drawer #new-preset-area input:focus {
-            border-color: var(--primary-cyan);
-            box-shadow: 0 0 8px var(--glow-cyan);
-        }
-        #drawer #new-preset-area .preset-btn {
-            flex: 0.4;
-            min-width: 50px;
-            font-size: 0.7rem;
-            padding: 6px 0;
+            font-size: 0.85rem;
+            padding: 30px 0;
         }
 
-        /* ==================== TIMER DISPLAY (OPTIMIZED MOBILE) ==================== */
+        /* ==================== TIMER DISPLAY ==================== */
         #timer-display {
             flex: 1 1 auto;
             display: flex;
@@ -583,44 +723,16 @@
             min-width: 45px;
         }
 
-        /* Hide Legacy Buttons */
-        #btn-pause, #btn-skip, #btn-reset {
-            display: none !important;
-        }
+        #btn-pause, #btn-skip, #btn-reset { display: none !important; }
 
         /* ==================== COLORI DINAMICI FASI ==================== */
-        .phase-work #big-number,
-        .phase-work #phase-label {
-            color: var(--work-green);
-            text-shadow: 0 0 25px rgba(56, 239, 125, 0.4);
-        }
-        .phase-rest #big-number,
-        .phase-rest #phase-label {
-            color: var(--rest-red);
-            text-shadow: 0 0 25px rgba(255, 77, 109, 0.4);
-        }
-        .phase-rest-warning #big-number,
-        .phase-rest-warning #phase-label {
-            color: var(--warning-yellow);
-            text-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
-        }
-        .phase-extra #big-number,
-        .phase-extra #phase-label {
-            color: var(--extra-blue);
-            text-shadow: 0 0 25px rgba(0, 180, 216, 0.5);
-        }
-        .phase-countdown #big-number,
-        .phase-countdown #phase-label {
-            color: var(--primary-cyan);
-            text-shadow: 0 0 25px var(--glow-cyan);
-        }
-        .phase-finished #big-number,
-        .phase-finished #phase-label {
-            color: var(--work-green);
-            text-shadow: 0 0 30px rgba(56, 239, 125, 0.6);
-        }
+        .phase-work #big-number, .phase-work #phase-label { color: var(--work-green); text-shadow: 0 0 25px rgba(56, 239, 125, 0.4); }
+        .phase-rest #big-number, .phase-rest #phase-label { color: var(--rest-red); text-shadow: 0 0 25px rgba(255, 77, 109, 0.4); }
+        .phase-rest-warning #big-number, .phase-rest-warning #phase-label { color: var(--warning-yellow); text-shadow: 0 0 25px rgba(255, 193, 7, 0.5); }
+        .phase-extra #big-number, .phase-extra #phase-label { color: var(--extra-blue); text-shadow: 0 0 25px rgba(0, 180, 216, 0.5); }
+        .phase-countdown #big-number, .phase-countdown #phase-label { color: var(--primary-cyan); text-shadow: 0 0 25px var(--glow-cyan); }
+        .phase-finished #big-number, .phase-finished #phase-label { color: var(--work-green); text-shadow: 0 0 30px rgba(56, 239, 125, 0.6); }
 
-        /* ==================== MEDIA QUERIES PER DEVICE PICCOLI ==================== */
         @media (max-height: 680px) {
             #app { padding-top: 50px; }
             #big-number { font-size: clamp(2.8rem, 16vw, 6rem); }
@@ -631,16 +743,16 @@
 </head>
 <body>
 
-    <!-- ==================== LOGO HEADER ==================== -->
+    <!-- LOGO HEADER -->
     <button id="logo-header" aria-label="Apri menu KrioPlanet">
         <img src="Logo-Blu.svg" alt="KrioPlanet" id="logo-img">
         <span class="brand-name">KRIOPLANET</span>
     </button>
 
-    <!-- ==================== OVERLAY ==================== -->
+    <!-- OVERLAY -->
     <div id="overlay"></div>
 
-    <!-- ==================== DRAWER ==================== -->
+    <!-- DRAWER -->
     <div id="drawer">
         <div id="drawer-header">
             <div class="logo-large">
@@ -649,7 +761,8 @@
             </div>
             <button id="drawer-close" aria-label="Chiudi menu">✕</button>
         </div>
-        <!-- ===== IMPOSTAZIONI ===== -->
+
+        <!-- IMPOSTAZIONI -->
         <div id="setup-inside-drawer">
             <div class="row">
                 <label>⏱ Lavoro</label>
@@ -696,9 +809,15 @@
                 <label>🎵 Tick</label>
                 <div class="switch" id="tick-toggle"></div>
             </div>
+
+            <!-- SALVA IN LIBRERIA DIRECTLY FROM DRAWER -->
+            <div class="drawer-save-section">
+                <input type="text" id="drawer-save-name" placeholder="Nome workout (es. Gambe)" maxlength="25">
+                <button id="btn-save-drawer" class="btn-save-drawer">💾 SALVA IN LIBRERIA</button>
+            </div>
         </div>
 
-        <!-- ===== PRESET STANDARD ===== -->
+        <!-- PRESET STANDARD -->
         <div id="preset-bar">
             <div class="preset-btn" data-preset="hiit">🔥 HIIT</div>
             <div class="preset-btn" data-preset="tabata">⚡ TABATA</div>
@@ -706,18 +825,30 @@
             <div class="preset-btn" data-preset="cardio">🫀 CARDIO</div>
         </div>
 
-        <!-- ===== PRESET PERSONALIZZATI ===== -->
-        <div id="custom-presets-section">
-            <div class="label-custom">📁 I MIEI PRESET</div>
-            <div id="custom-presets-list" style="display: flex; flex-wrap: wrap; gap: 4px; width: 100%;"></div>
-            <div id="new-preset-area">
-                <input type="text" id="new-preset-name" placeholder="Nome..." maxlength="20">
-                <button class="preset-btn save-btn" id="btn-add-custom">➕ NUOVO</button>
+        <!-- BOTTONE LIBRERIA -->
+        <button id="btn-open-library">📁 Apri Libreria (0)</button>
+    </div>
+
+    <!-- MODALE LIBRERIA WORKOUT -->
+    <div id="library-modal">
+        <div class="modal-header">
+            <h2>📁 Libreria Workout</h2>
+            <button class="modal-close-btn" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <!-- CAMPO DI RICERCA -->
+            <div class="search-box">
+                <input type="text" id="library-search-input" placeholder="🔍 Cerca per nome...">
+            </div>
+
+            <!-- LISTA PRESET PERSONALIZZATI -->
+            <div class="library-list" id="library-items-list">
+                <!-- Generati via JS -->
             </div>
         </div>
     </div>
 
-    <!-- ==================== APP PRINCIPALE ==================== -->
+    <!-- APP PRINCIPALE -->
     <div id="app">
         <!-- TIMER -->
         <div id="timer-display">
@@ -757,20 +888,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
-            // VIBRAZIONE APTICA PER FEEDBACK CONTINUO
             function triggerVibration(pattern) {
-                if (navigator.vibrate) {
-                    navigator.vibrate(pattern);
-                }
+                if (navigator.vibrate) navigator.vibrate(pattern);
             }
 
             // ==============================
-            // 1. DRAWER
+            // 1. DRAWER E MODALE LIBRERIA
             // ==============================
             var drawer = document.getElementById('drawer');
             var overlay = document.getElementById('overlay');
             var logoBtn = document.getElementById('logo-header');
             var closeBtn = document.getElementById('drawer-close');
+            var libraryModal = document.getElementById('library-modal');
+            var btnOpenLibrary = document.getElementById('btn-open-library');
+            var modalCloseBtn = document.getElementById('modal-close');
 
             function openDrawer() {
                 drawer.classList.add('open');
@@ -784,13 +915,29 @@
                 document.body.style.overflow = '';
             }
 
+            function openLibraryModal() {
+                renderLibraryItems();
+                libraryModal.classList.add('active');
+            }
+
+            function closeLibraryModal() {
+                libraryModal.classList.remove('active');
+            }
+
             logoBtn.addEventListener('click', openDrawer);
             closeBtn.addEventListener('click', closeDrawer);
-            overlay.addEventListener('click', closeDrawer);
+            overlay.addEventListener('click', function() {
+                closeDrawer();
+                closeLibraryModal();
+            });
+
+            btnOpenLibrary.addEventListener('click', openLibraryModal);
+            modalCloseBtn.addEventListener('click', closeLibraryModal);
 
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && drawer.classList.contains('open')) {
-                    closeDrawer();
+                if (e.key === 'Escape') {
+                    if (libraryModal.classList.contains('active')) closeLibraryModal();
+                    else if (drawer.classList.contains('open')) closeDrawer();
                 }
             });
 
@@ -816,16 +963,17 @@
             var btnStop = document.getElementById('btn-stop');
             var presetBtns = document.querySelectorAll('#drawer .preset-btn[data-preset]');
             var tickToggle = document.getElementById('tick-toggle');
-            var customList = document.getElementById('custom-presets-list');
-            var newPresetName = document.getElementById('new-preset-name');
-            var btnAddCustom = document.getElementById('btn-add-custom');
+
+            // DOM Libreria Modal & Save Drawer
+            var libraryItemsList = document.getElementById('library-items-list');
+            var drawerSaveName = document.getElementById('drawer-save-name');
+            var btnSaveDrawer = document.getElementById('btn-save-drawer');
+            var librarySearchInput = document.getElementById('library-search-input');
 
             var CIRC_OUTER = 289.03;
             var CIRC_INNER = 245.04;
 
-            // ==============================
-            // 3. PRESETS
-            // ==============================
+            // PRESETS STANDARD
             var PRESETS = {
                 hiit: { work: 30, rest: 15, rounds: 12, extraEvery: 4, extraDur: 60 },
                 tabata: { work: 20, rest: 10, rounds: 8, extraEvery: 0, extraDur: 60 },
@@ -833,9 +981,7 @@
                 cardio: { work: 60, rest: 20, rounds: 10, extraEvery: 5, extraDur: 120 }
             };
 
-            // ==============================
-            // 4. STATO GLOBALE
-            // ==============================
+            // STATO GLOBALE
             var settings = { work: 30, rest: 15, rounds: 12, extraEvery: 4, extraDur: 60 };
             var tickEnabled = false;
             var tickInterval = null;
@@ -854,11 +1000,8 @@
                 extraTriggeredThisRound: false
             };
 
-            // ==============================
-            // 5. AUDIO
-            // ==============================
+            // AUDIO
             var audioCtx = null;
-
             function initAudio() {
                 if (!audioCtx) {
                     try { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
@@ -867,28 +1010,20 @@
             }
 
             function playBeep(freq, duration) {
-                freq = freq || 800;
-                duration = duration || 80;
+                freq = freq || 800; duration = duration || 80;
                 try {
-                    initAudio();
-                    if (!audioCtx) return;
+                    initAudio(); if (!audioCtx) return;
                     var osc = audioCtx.createOscillator();
                     var gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
+                    osc.type = 'sine'; osc.frequency.value = freq;
                     gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + duration / 1000);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(); osc.stop(audioCtx.currentTime + duration / 1000);
                 } catch (e) {}
             }
 
-            function playCountdownTick(seconds) {
-                playBeep(800, 80);
-            }
-
+            function playCountdownTick(seconds) { playBeep(800, 80); }
             function handleCountdownTick() {
                 if (timerState.isPaused) return;
                 var seconds = Math.ceil(timerState.currentTime);
@@ -897,41 +1032,16 @@
                     playCountdownTick(seconds);
                 }
             }
-
-            function playGong() {
-                try {
-                    initAudio();
-                    if (!audioCtx) return;
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.6);
-                    gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.7);
-                } catch (e) {}
-            }
-
+            function playGong() { playBeep(400, 600); }
             function playExtraAlert() {
                 playBeep(600, 150);
                 setTimeout(function() { playBeep(900, 150); }, 180);
             }
-
             function playTickMetronome() { playBeep(1200, 30); }
 
-            // ==============================
-            // 6. CALCOLO DURATA TOTALE
-            // ==============================
             function calculateTotalDuration() {
-                var work = settings.work;
-                var rest = settings.rest;
-                var rounds = settings.rounds;
-                var extraEvery = settings.extraEvery;
-                var extraDur = settings.extraDur;
+                var work = settings.work, rest = settings.rest, rounds = settings.rounds;
+                var extraEvery = settings.extraEvery, extraDur = settings.extraDur;
                 if (rounds === 0) return 0;
                 var total = (work + rest) * rounds;
                 if (extraEvery > 0) {
@@ -942,14 +1052,11 @@
                 return total;
             }
 
-            // ==============================
-            // 7. TICK
-            // ==============================
+            // TICK METRONOMO
             function loadTickState() {
                 try { tickEnabled = localStorage.getItem('pt_timer_tick') === 'true'; } catch (e) { tickEnabled = false; }
                 tickToggle.classList.toggle('active', tickEnabled);
             }
-
             function saveTickState() {
                 try { localStorage.setItem('pt_timer_tick', tickEnabled ? 'true' : 'false'); } catch (e) {}
             }
@@ -960,7 +1067,6 @@
                 if (timerState.status === 'work' && !timerState.isPaused) startTick();
                 else stopTick();
             });
-
             function startTick() {
                 stopTick();
                 if (!tickEnabled || timerState.status !== 'work' || timerState.isPaused) return;
@@ -969,83 +1075,72 @@
                     else stopTick();
                 }, 1000);
             }
-
             function stopTick() { if (tickInterval) { clearInterval(tickInterval); tickInterval = null; } }
 
             // ==============================
-            // 8. CUSTOM PRESETS
+            // LIBRERIA PRESET - SALVATAGGIO & CARICAMENTO
             // ==============================
-            var customPresets = [];
+            var libraryPresets = [];
 
-            function loadCustomPresets() {
-                try { var d = localStorage.getItem('pt_timer_custom_presets'); if (d) customPresets = JSON.parse(d);
-                    else customPresets = []; } catch (e) { customPresets = []; }
-                renderCustomPresets();
+            function loadLibraryPresets() {
+                try {
+                    var data = localStorage.getItem('pt_timer_library_presets');
+                    if (data) libraryPresets = JSON.parse(data);
+                    else libraryPresets = [];
+                } catch (e) { libraryPresets = []; }
+                updateLibraryButtonLabel();
             }
 
-            function saveCustomPresets() {
-                try { localStorage.setItem('pt_timer_custom_presets', JSON.stringify(customPresets)); } catch (e) {}
-                renderCustomPresets();
+            function saveLibraryPresets() {
+                try {
+                    localStorage.setItem('pt_timer_library_presets', JSON.stringify(libraryPresets));
+                } catch (e) {}
+                updateLibraryButtonLabel();
+                renderLibraryItems();
             }
 
-            function renderCustomPresets() {
-                customList.innerHTML = '';
-                customPresets.forEach(function(p, idx) {
-                    var wrapper = document.createElement('div');
-                    wrapper.className = 'custom-preset-wrapper';
-                    var btn = document.createElement('div');
-                    btn.className = 'preset-btn custom-btn';
-                    btn.textContent = p.name.length > 10 ? p.name.substring(0, 10) + '…' : p.name;
-                    btn.title = p.name;
-                    (function(i) {
-                        btn.addEventListener('click', function() { loadCustomPresetByIndex(i); });
-                    })(idx);
-                    var del = document.createElement('div');
-                    del.className = 'delete-btn';
-                    del.textContent = '✖';
-                    (function(i) {
-                        del.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            if (confirm('Eliminare "' + p.name + '"?')) {
-                                customPresets.splice(i, 1);
-                                saveCustomPresets();
-                            }
-                        });
-                    })(idx);
-                    wrapper.appendChild(btn);
-                    wrapper.appendChild(del);
-                    customList.appendChild(wrapper);
-                });
-                var area = document.getElementById('new-preset-area');
-                area.style.display = (customPresets.length >= 5) ? 'none' : 'flex';
+            function updateLibraryButtonLabel() {
+                btnOpenLibrary.textContent = '📁 Apri Libreria (' + libraryPresets.length + ')';
             }
 
-            function addCustomPreset(name) {
-                if (customPresets.length >= 5) { alert('Hai già 5 preset!'); return; }
-                if (!name || name.trim() === '') { alert('Inserisci un nome.'); return; }
-                var current = {
+            function addLibraryPreset(name) {
+                if (!name || name.trim() === '') {
+                    alert('Inserisci un nome per l\'allenamento!');
+                    return;
+                }
+                var newItem = {
+                    id: Date.now(),
+                    name: name.trim(),
                     work: parseInt(valWork.textContent, 10) || 30,
                     rest: parseInt(valRest.textContent, 10) || 15,
-                    rounds: parseInt(valRounds.textContent, 10) || 8,
+                    rounds: parseInt(valRounds.textContent, 10) || 12,
                     extraEvery: parseInt(valExtraEvery.textContent, 10) || 0,
-                    extraDur: parseInt(valExtraDur.textContent, 10) || 60
+                    extraDur: parseInt(valExtraDur.textContent, 10) || 60,
+                    date: new Date().toLocaleDateString('it-IT')
                 };
-                customPresets.push({ name: name.trim(), work: current.work, rest: current.rest, rounds: current.rounds,
-                    extraEvery: current.extraEvery, extraDur: current.extraDur });
-                saveCustomPresets();
-                newPresetName.value = '';
-                alert('✅ Preset "' + name.trim() + '" salvato!');
+                libraryPresets.unshift(newItem);
+                saveLibraryPresets();
+                drawerSaveName.value = '';
+                alert('Workout "' + newItem.name + '" salvato in libreria!');
             }
 
-            function loadCustomPresetByIndex(idx) {
-                if (timerState.status !== 'idle' && timerState.status !== 'finished') return;
-                var p = customPresets[idx];
-                if (!p) return;
-                settings.work = p.work;
-                settings.rest = p.rest;
-                settings.rounds = p.rounds;
-                settings.extraEvery = p.extraEvery;
-                settings.extraDur = p.extraDur;
+            function deleteLibraryPreset(id) {
+                if (confirm('Sei sicuro di voler eliminare questo workout?')) {
+                    libraryPresets = libraryPresets.filter(function(item) { return item.id !== id; });
+                    saveLibraryPresets();
+                }
+            }
+
+            function loadLibraryPresetIntoTimer(id) {
+                var found = libraryPresets.find(function(item) { return item.id === id; });
+                if (!found) return;
+
+                settings.work = found.work;
+                settings.rest = found.rest;
+                settings.rounds = found.rounds;
+                settings.extraEvery = found.extraEvery;
+                settings.extraDur = found.extraDur;
+
                 syncUIFromSettings();
                 timerState.totalRounds = settings.rounds;
                 timerState.currentRound = 0;
@@ -1053,21 +1148,76 @@
                 timerState.maxTime = settings.work;
                 resetUI();
                 updateUI();
+
                 presetBtns.forEach(function(b) { b.classList.remove('active'); });
-                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove('active'); });
-                var wrappers = document.querySelectorAll('.custom-preset-wrapper');
-                if (wrappers[idx]) {
-                    var btn = wrappers[idx].querySelector('.preset-btn');
-                    if (btn) btn.classList.add('active');
-                }
+                closeLibraryModal();
+                closeDrawer();
             }
 
-            btnAddCustom.addEventListener('click', function() { addCustomPreset(newPresetName.value); });
-            newPresetName.addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomPreset(newPresetName.value); });
+            function renderLibraryItems() {
+                var query = librarySearchInput.value.toLowerCase().trim();
+                libraryItemsList.innerHTML = '';
 
-            // ==============================
-            // 9. UI UPDATE
-            // ==============================
+                var filtered = libraryPresets.filter(function(item) {
+                    return item.name.toLowerCase().includes(query);
+                });
+
+                if (filtered.length === 0) {
+                    libraryItemsList.innerHTML = '<div class="empty-library-msg">' +
+                        (query ? 'Nessun allenamento trovato.' : 'Nessun allenamento salvato nella libreria.') +
+                        '</div>';
+                    return;
+                }
+
+                filtered.forEach(function(item) {
+                    var card = document.createElement('div');
+                    card.className = 'library-item';
+
+                    var info = document.createElement('div');
+                    info.className = 'library-item-info';
+
+                    var title = document.createElement('div');
+                    title.className = 'library-item-title';
+                    title.textContent = item.name;
+
+                    var details = document.createElement('div');
+                    details.className = 'library-item-details';
+                    details.innerHTML = '⏱ <span>' + item.work + 's</span> / 🧘🏻‍♀️ <span>' + item.rest + 's</span> | 🔁 <span>' + item.rounds + ' giri</span>' +
+                        (item.extraEvery > 0 ? ' | 🕝 Extra ogni <span>' + item.extraEvery + '</span>' : '');
+
+                    info.appendChild(title);
+                    info.appendChild(details);
+
+                    var actions = document.createElement('div');
+                    actions.className = 'library-item-actions';
+
+                    var btnLoad = document.createElement('button');
+                    btnLoad.className = 'btn-action-load';
+                    btnLoad.textContent = 'CARICA';
+                    btnLoad.addEventListener('click', function() { loadLibraryPresetIntoTimer(item.id); });
+
+                    var btnDel = document.createElement('button');
+                    btnDel.className = 'btn-action-del';
+                    btnDel.textContent = '🗑';
+                    btnDel.addEventListener('click', function() { deleteLibraryPreset(item.id); });
+
+                    actions.appendChild(btnLoad);
+                    actions.appendChild(btnDel);
+
+                    card.appendChild(info);
+                    card.appendChild(actions);
+
+                    libraryItemsList.appendChild(card);
+                });
+            }
+
+            btnSaveDrawer.addEventListener('click', function() {
+                addLibraryPreset(drawerSaveName.value);
+            });
+
+            librarySearchInput.addEventListener('input', renderLibraryItems);
+
+            // UPDATE UI
             function updateDots() {
                 var total = timerState.totalRounds || 1;
                 var done = timerState.currentRound;
@@ -1075,14 +1225,10 @@
                 for (var i = 1; i <= total; i++) {
                     var dot = document.createElement('span');
                     dot.className = 'dot';
-                    if (i < done) {
-                        dot.classList.add('done');
-                    } else if (i === done && timerState.status !== 'idle' && timerState.status !== 'finished') {
-                        if (timerState.status === 'extra') {
-                            dot.classList.add('extra-dot');
-                        } else {
-                            dot.classList.add('current');
-                        }
+                    if (i < done) dot.classList.add('done');
+                    else if (i === done && timerState.status !== 'idle' && timerState.status !== 'finished') {
+                        if (timerState.status === 'extra') dot.classList.add('extra-dot');
+                        else dot.classList.add('current');
                     }
                     progressDots.appendChild(dot);
                 }
@@ -1100,27 +1246,14 @@
                 var color = 'rgba(255,255,255,0.2)';
                 var phaseClass = '';
                 var isRestWarning = (timerState.status === 'rest' && timerState.currentTime <= 3 && timerState.currentTime > 0);
-                if (timerState.status === 'work') { 
-                    color = 'var(--work-green)';
-                    phaseClass = 'phase-work'; 
-                } else if (timerState.status === 'rest') {
-                    if (isRestWarning) { 
-                        color = 'var(--warning-yellow)';
-                        phaseClass = 'phase-rest-warning'; 
-                    } else { 
-                        color = 'var(--rest-red)';
-                        phaseClass = 'phase-rest'; 
-                    }
-                } else if (timerState.status === 'extra') { 
-                    color = 'var(--extra-blue)';
-                    phaseClass = 'phase-extra'; 
-                } else if (timerState.status === 'countdown') { 
-                    color = 'var(--primary-cyan)';
-                    phaseClass = 'phase-countdown'; 
-                } else if (timerState.status === 'finished') { 
-                    color = 'var(--work-green)';
-                    phaseClass = 'phase-finished'; 
-                }
+                if (timerState.status === 'work') { color = 'var(--work-green)'; phaseClass = 'phase-work'; }
+                else if (timerState.status === 'rest') {
+                    if (isRestWarning) { color = 'var(--warning-yellow)'; phaseClass = 'phase-rest-warning'; }
+                    else { color = 'var(--rest-red)'; phaseClass = 'phase-rest'; }
+                } else if (timerState.status === 'extra') { color = 'var(--extra-blue)'; phaseClass = 'phase-extra'; }
+                else if (timerState.status === 'countdown') { color = 'var(--primary-cyan)'; phaseClass = 'phase-countdown'; }
+                else if (timerState.status === 'finished') { color = 'var(--work-green)'; phaseClass = 'phase-finished'; }
+
                 ringInner.style.stroke = color;
                 appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
                 if (phaseClass) appDiv.classList.add(phaseClass);
@@ -1158,9 +1291,7 @@
                 stopTick();
             }
 
-            // ==============================
-            // 10. TIMER ENGINE
-            // ==============================
+            // TIMER ENGINE
             function stopTimer() {
                 if (timerState.timerInterval) {
                     clearInterval(timerState.timerInterval);
@@ -1170,44 +1301,31 @@
             }
 
             function startCountdownInterval() {
-                stopTimer();
-                lastCountdownSecond = -1;
+                stopTimer(); lastCountdownSecond = -1;
                 timerState.timerInterval = setInterval(function() {
                     if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1;
-                    totalElapsed += 0.1;
+                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
                     handleCountdownTick();
                     if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0;
-                        updateUI();
-                        setTimeout(function() {
-                            playBeep(1200, 80);
-                        }, 100);
-                        startWorkPhase();
-                        return;
+                        timerState.currentTime = 0; updateUI();
+                        setTimeout(function() { playBeep(1200, 80); }, 100);
+                        startWorkPhase(); return;
                     }
                     updateUI();
                 }, 100);
             }
 
             function startWorkInterval() {
-                stopTimer();
-                lastCountdownSecond = -1;
+                stopTimer(); lastCountdownSecond = -1;
                 timerState.timerInterval = setInterval(function() {
                     if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1;
-                    totalElapsed += 0.1;
+                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
                     handleCountdownTick();
                     if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0;
-                        updateUI();
-                        playGong();
-                        triggerVibration([300, 100, 300]);
-                        if (timerState.currentRound >= timerState.totalRounds) {
-                            finishWorkout();
-                        } else {
-                            startRestPhase();
-                        }
+                        timerState.currentTime = 0; updateUI();
+                        playGong(); triggerVibration([300, 100, 300]);
+                        if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
+                        else startRestPhase();
                         return;
                     }
                     updateUI();
@@ -1216,18 +1334,14 @@
             }
 
             function startRestInterval() {
-                stopTimer();
-                lastCountdownSecond = -1;
+                stopTimer(); lastCountdownSecond = -1;
                 timerState.timerInterval = setInterval(function() {
                     if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1;
-                    totalElapsed += 0.1;
+                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
                     handleCountdownTick();
                     if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0;
-                        updateUI();
-                        playBeep(1200, 80);
-                        triggerVibration([200, 100, 200]);
+                        timerState.currentTime = 0; updateUI();
+                        playBeep(1200, 80); triggerVibration([200, 100, 200]);
                         var shouldTriggerExtra = (settings.extraEvery > 0) &&
                             (timerState.currentRound % settings.extraEvery === 0) &&
                             !timerState.extraTriggeredThisRound &&
@@ -1235,9 +1349,7 @@
                         if (shouldTriggerExtra) {
                             timerState.extraTriggeredThisRound = true;
                             startExtraPhase();
-                        } else {
-                            startWorkPhase();
-                        }
+                        } else startWorkPhase();
                         return;
                     }
                     updateUI();
@@ -1245,279 +1357,148 @@
             }
 
             function startExtraInterval() {
-                stopTimer();
-                lastCountdownSecond = -1;
+                stopTimer(); lastCountdownSecond = -1;
                 timerState.timerInterval = setInterval(function() {
                     if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1;
-                    totalElapsed += 0.1;
+                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
                     handleCountdownTick();
                     if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0;
-                        updateUI();
-                        playBeep(1000, 400);
-                        triggerVibration([300]);
-                        startWorkPhase();
-                        return;
+                        timerState.currentTime = 0; updateUI();
+                        playBeep(1000, 400); triggerVibration([300]);
+                        startWorkPhase(); return;
                     }
                     updateUI();
                 }, 100);
             }
 
-            // ==============================
-            // 11. FUNZIONI DI AVVIO FASI
-            // ==============================
+            // FASI
             function startCountdown() {
-                stopTimer();
-                triggerVibration([100, 100, 100]);
-                timerState.status = 'countdown';
-                timerState.currentTime = 3;
-                timerState.maxTime = 3;
-                timerState.isPaused = false;
-                phaseLabel.textContent = 'PARTENZA';
-                btnSkipBack.style.display = 'none';
-                btnSkipForward.style.display = 'none';
-                btnStop.style.display = 'none';
-                updateUI();
-                startCountdownInterval();
+                stopTimer(); triggerVibration([100, 100, 100]);
+                timerState.status = 'countdown'; timerState.currentTime = 3; timerState.maxTime = 3;
+                timerState.isPaused = false; phaseLabel.textContent = 'PARTENZA';
+                btnSkipBack.style.display = 'none'; btnSkipForward.style.display = 'none'; btnStop.style.display = 'none';
+                updateUI(); startCountdownInterval();
             }
 
             function startWorkPhase() {
-                stopTimer();
-                triggerVibration([200]);
-                timerState.status = 'work';
-                timerState.currentRound += 1;
-                timerState.currentTime = settings.work;
-                timerState.maxTime = settings.work;
-                timerState.isPaused = false;
-                timerState.extraTriggeredThisRound = false;
+                stopTimer(); triggerVibration([200]);
+                timerState.status = 'work'; timerState.currentRound += 1;
+                timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                timerState.isPaused = false; timerState.extraTriggeredThisRound = false;
                 phaseLabel.textContent = 'LAVORO';
-                btnSkipBack.style.display = 'flex';
-                btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'flex';
-                btnSkipForward.textContent = '▶ AVV.';
+                btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI();
-                startWorkInterval();
+                updateUI(); startWorkInterval();
             }
 
             function startRestPhase() {
-                stopTimer();
-                triggerVibration([100]);
-                timerState.status = 'rest';
-                timerState.currentTime = settings.rest;
-                timerState.maxTime = settings.rest;
-                timerState.isPaused = false;
-                phaseLabel.textContent = 'RECUPERO';
-                btnSkipBack.style.display = 'flex';
-                btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'flex';
-                btnSkipForward.textContent = '▶ AVV.';
+                stopTimer(); triggerVibration([100]);
+                timerState.status = 'rest'; timerState.currentTime = settings.rest; timerState.maxTime = settings.rest;
+                timerState.isPaused = false; phaseLabel.textContent = 'RECUPERO';
+                btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI();
-                stopTick();
-                startRestInterval();
+                updateUI(); stopTick(); startRestInterval();
             }
 
             function startExtraPhase() {
-                stopTimer();
-                triggerVibration([100, 50, 100]);
-                timerState.status = 'extra';
-                timerState.currentTime = settings.extraDur;
-                timerState.maxTime = settings.extraDur;
-                timerState.isPaused = false;
-                phaseLabel.textContent = 'EXTRA ATTIVO';
-                btnSkipBack.style.display = 'flex';
-                btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'flex';
-                btnSkipForward.textContent = '▶ AVV.';
+                stopTimer(); triggerVibration([100, 50, 100]);
+                timerState.status = 'extra'; timerState.currentTime = settings.extraDur; timerState.maxTime = settings.extraDur;
+                timerState.isPaused = false; phaseLabel.textContent = 'EXTRA ATTIVO';
+                btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
+                btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI();
-                playExtraAlert();
-                stopTick();
-                startExtraInterval();
+                updateUI(); playExtraAlert(); stopTick(); startExtraInterval();
             }
 
             function finishWorkout() {
-                stopTimer();
-                triggerVibration([100, 50, 100, 50, 300]);
-                timerState.status = 'finished';
-                timerState.currentTime = 0;
-                phaseLabel.textContent = 'COMPLETATO';
-                bigNumber.textContent = '0';
+                stopTimer(); triggerVibration([100, 50, 100, 50, 300]);
+                timerState.status = 'finished'; timerState.currentTime = 0;
+                phaseLabel.textContent = 'COMPLETATO'; bigNumber.textContent = '0';
                 roundsInfo.textContent = 'Giro ' + timerState.currentRound + ' / ' + timerState.totalRounds;
-                ringInner.style.strokeDashoffset = 0;
-                ringInner.style.stroke = 'var(--work-green)';
+                ringInner.style.strokeDashoffset = 0; ringInner.style.stroke = 'var(--work-green)';
                 ringOuter.style.strokeDashoffset = 0;
                 if (totalDuration > 0) totalElapsed = totalDuration;
                 appDiv.classList.add('phase-finished');
-                btnStart.style.display = 'flex';
-                btnStart.textContent = 'RIAVVIA';
-                btnStart.className = 'ctrl-btn idle';
-                btnPause.style.display = 'none';
-                btnSkipBack.style.display = 'none';
-                btnSkipForward.style.display = 'none';
-                btnStop.style.display = 'none';
-                updateDots();
-                stopTick();
+                btnStart.style.display = 'flex'; btnStart.textContent = 'RIAVVIA'; btnStart.className = 'ctrl-btn idle';
+                btnPause.style.display = 'none'; btnSkipBack.style.display = 'none'; btnSkipForward.style.display = 'none'; btnStop.style.display = 'none';
+                updateDots(); stopTick();
                 setTimeout(function() { playBeep(523, 200); }, 100);
                 setTimeout(function() { playBeep(659, 200); }, 300);
                 setTimeout(function() { playBeep(784, 400); }, 500);
             }
 
-            // ==============================
-            // 12. SKIP BACK
-            // ==============================
+            // CONTROLLI
             function skipBack() {
-                if (timerState.status === 'idle' || timerState.status === 'finished') return;
-                if (timerState.isPaused) return;
-
+                if (timerState.status === 'idle' || timerState.status === 'finished' || timerState.isPaused) return;
                 var s = timerState.status;
-
                 if (s === 'work') {
                     if (timerState.currentRound > 1) {
-                        timerState.currentRound -= 1;
-                        timerState.status = 'rest';
-                        timerState.currentTime = settings.rest;
-                        timerState.maxTime = settings.rest;
+                        timerState.currentRound -= 1; timerState.status = 'rest';
+                        timerState.currentTime = settings.rest; timerState.maxTime = settings.rest;
                         timerState.extraTriggeredThisRound = false;
                         phaseLabel.textContent = 'RECUPERO';
-                        btnSkipBack.textContent = '◀ IND.';
-                        btnSkipForward.textContent = '▶ AVV.';
-                        btnStop.style.display = 'flex';
-                        updateUI();
-                        triggerVibration([100]);
-                        stopTick();
-                        startRestInterval();
-                        btnStart.textContent = 'PAUSA';
-                        btnStart.className = 'ctrl-btn running';
+                        updateUI(); triggerVibration([100]); stopTick(); startRestInterval();
                     }
-                } else if (s === 'rest') {
-                    timerState.status = 'work';
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    phaseLabel.textContent = 'LAVORO';
-                    btnSkipBack.textContent = '◀ IND.';
-                    btnSkipForward.textContent = '▶ AVV.';
-                    btnStop.style.display = 'flex';
-                    updateUI();
-                    triggerVibration([200]);
-                    startWorkInterval();
-                    btnStart.textContent = 'PAUSA';
-                    btnStart.className = 'ctrl-btn running';
-                } else if (s === 'extra') {
-                    timerState.status = 'work';
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    phaseLabel.textContent = 'LAVORO';
-                    btnSkipBack.textContent = '◀ IND.';
-                    btnSkipForward.textContent = '▶ AVV.';
-                    btnStop.style.display = 'flex';
-                    updateUI();
-                    triggerVibration([200]);
-                    startWorkInterval();
-                    btnStart.textContent = 'PAUSA';
-                    btnStart.className = 'ctrl-btn running';
-                } else if (s === 'countdown') {
-                    // non fare nulla
+                } else if (s === 'rest' || s === 'extra') {
+                    timerState.status = 'work'; timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                    phaseLabel.textContent = 'LAVORO'; updateUI(); triggerVibration([200]); startWorkInterval();
                 }
             }
 
-            // ==============================
-            // 13. SKIP FORWARD
-            // ==============================
             function skipForward() {
-                if (timerState.status === 'idle' || timerState.status === 'finished') return;
-                if (timerState.isPaused) return;
+                if (timerState.status === 'idle' || timerState.status === 'finished' || timerState.isPaused) return;
                 var remaining = timerState.currentTime;
                 if (remaining > 0) totalElapsed += remaining;
-                stopTimer();
-                stopTick();
+                stopTimer(); stopTick();
                 var s = timerState.status;
                 if (s === 'work') {
-                    playGong();
-                    triggerVibration([200]);
-                    if (timerState.currentRound >= timerState.totalRounds) {
-                        finishWorkout();
-                    } else {
+                    playGong(); triggerVibration([200]);
+                    if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
+                    else {
                         var shouldTriggerExtra = (settings.extraEvery > 0) &&
                             (timerState.currentRound % settings.extraEvery === 0) &&
                             !timerState.extraTriggeredThisRound &&
                             (timerState.currentRound < timerState.totalRounds);
-                        if (shouldTriggerExtra) {
-                            timerState.extraTriggeredThisRound = true;
-                            startExtraPhase();
-                        } else {
-                            startRestPhase();
-                        }
+                        if (shouldTriggerExtra) { timerState.extraTriggeredThisRound = true; startExtraPhase(); }
+                        else startRestPhase();
                     }
                 } else if (s === 'rest') {
-                    playBeep(1200, 80);
-                    triggerVibration([100]);
-                    startWorkPhase();
+                    playBeep(1200, 80); triggerVibration([100]); startWorkPhase();
                 } else if (s === 'extra') {
-                    playBeep(1000, 200);
-                    triggerVibration([100]);
-                    startWorkPhase();
-                } else if (s === 'countdown') {
-                    startWorkPhase();
-                }
+                    playBeep(1000, 200); triggerVibration([100]); startWorkPhase();
+                } else if (s === 'countdown') startWorkPhase();
                 updateUI();
             }
 
-            // ==============================
-            // 14. STOP / PAUSA / RESET
-            // ==============================
             function stopAll() {
-                stopTimer();
-                stopTick();
-                timerState.status = 'idle';
-                timerState.currentRound = 0;
-                timerState.isPaused = false;
-                timerState.extraTriggeredThisRound = false;
-                timerState.currentTime = settings.work;
-                timerState.maxTime = settings.work;
-                timerState.totalRounds = settings.rounds;
-                totalElapsed = 0;
-                lastCountdownSecond = -1;
-                syncUIFromSettings();
-                resetUI();
-                updateUI();
+                stopTimer(); stopTick();
+                timerState.status = 'idle'; timerState.currentRound = 0; timerState.isPaused = false;
+                timerState.extraTriggeredThisRound = false; timerState.currentTime = settings.work;
+                timerState.maxTime = settings.work; timerState.totalRounds = settings.rounds;
+                totalElapsed = 0; lastCountdownSecond = -1;
+                syncUIFromSettings(); resetUI(); updateUI();
             }
 
             function togglePause() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) {
-                    timerState.isPaused = false;
-                    btnStart.textContent = 'PAUSA';
-                    btnStart.className = 'ctrl-btn running';
+                    timerState.isPaused = false; btnStart.textContent = 'PAUSA'; btnStart.className = 'ctrl-btn running';
                     var s = timerState.status;
                     if (s === 'work') startWorkInterval();
                     else if (s === 'rest') startRestInterval();
                     else if (s === 'extra') startExtraInterval();
                     else if (s === 'countdown') startCountdownInterval();
                 } else {
-                    timerState.isPaused = true;
-                    btnStart.textContent = 'RIPRENDI';
-                    btnStart.className = 'ctrl-btn idle';
-                    stopTimer();
-                    stopTick();
-                    updateUI();
+                    timerState.isPaused = true; btnStart.textContent = 'RIPRENDI'; btnStart.className = 'ctrl-btn idle';
+                    stopTimer(); stopTick(); updateUI();
                 }
             }
 
-            function resetAll() {
-                stopAll();
-            }
-
-            // ==============================
-            // 15. HELPER PER SETTINGS
-            // ==============================
             function syncUIFromSettings() {
-                valWork.textContent = settings.work;
-                valRest.textContent = settings.rest;
-                valRounds.textContent = settings.rounds;
-                valExtraEvery.textContent = settings.extraEvery;
+                valWork.textContent = settings.work; valRest.textContent = settings.rest;
+                valRounds.textContent = settings.rounds; valExtraEvery.textContent = settings.extraEvery;
                 valExtraDur.textContent = settings.extraDur;
             }
 
@@ -1529,92 +1510,57 @@
                 settings.extraDur = parseInt(valExtraDur.textContent, 10) || 60;
                 timerState.totalRounds = settings.rounds;
                 if (timerState.status === 'idle' || timerState.status === 'finished') {
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    bigNumber.textContent = settings.work;
-                    roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
-                    ringInner.style.strokeDashoffset = CIRC_INNER;
-                    ringInner.style.stroke = 'rgba(255,255,255,0.2)';
-                    ringOuter.style.strokeDashoffset = CIRC_OUTER;
-                    phaseLabel.textContent = 'PRONTO';
-                    appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra',
-                        'phase-countdown', 'phase-finished');
+                    timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                    bigNumber.textContent = settings.work; roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
+                    ringInner.style.strokeDashoffset = CIRC_INNER; ringInner.style.stroke = 'rgba(255,255,255,0.2)';
+                    ringOuter.style.strokeDashoffset = CIRC_OUTER; phaseLabel.textContent = 'PRONTO';
+                    appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
                     updateDots();
                 }
             }
 
-            // ==============================
-            // 16. PRESET STANDARD
-            // ==============================
             function loadPreset(name) {
                 if (timerState.status !== 'idle' && timerState.status !== 'finished') return;
-                var preset = PRESETS[name];
-                if (!preset) return;
-                settings.work = preset.work;
-                settings.rest = preset.rest;
-                settings.rounds = preset.rounds;
-                settings.extraEvery = preset.extraEvery;
+                var preset = PRESETS[name]; if (!preset) return;
+                settings.work = preset.work; settings.rest = preset.rest;
+                settings.rounds = preset.rounds; settings.extraEvery = preset.extraEvery;
                 settings.extraDur = preset.extraDur;
                 syncUIFromSettings();
-                timerState.totalRounds = settings.rounds;
-                timerState.currentRound = 0;
-                timerState.currentTime = settings.work;
-                timerState.maxTime = settings.work;
-                totalElapsed = 0;
-                resetUI();
-                updateUI();
+                timerState.totalRounds = settings.rounds; timerState.currentRound = 0;
+                timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                totalElapsed = 0; resetUI(); updateUI();
                 presetBtns.forEach(function(b) { b.classList.remove('active'); });
                 var target = document.querySelector('#drawer .preset-btn[data-preset="' + name + '"]');
                 if (target) target.classList.add('active');
-                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove('active'); });
             }
 
-            // ==============================
-            // 17. START
-            // ==============================
             function handleStart() {
                 initAudio();
                 if (timerState.status === 'idle' || timerState.status === 'finished') {
                     loadSettingsIntoState();
                     totalDuration = calculateTotalDuration();
                     if (totalDuration <= 0) totalDuration = 1;
-                    totalElapsed = 0;
-                    timerState.currentRound = 0;
-                    timerState.extraTriggeredThisRound = false;
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    btnStart.textContent = 'PAUSA';
-                    btnStart.className = 'ctrl-btn running';
-                    btnSkipBack.style.display = 'none';
-                    btnSkipForward.style.display = 'none';
-                    btnStop.style.display = 'none';
+                    totalElapsed = 0; timerState.currentRound = 0; timerState.extraTriggeredThisRound = false;
+                    timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                    btnStart.textContent = 'PAUSA'; btnStart.className = 'ctrl-btn running';
+                    btnSkipBack.style.display = 'none'; btnSkipForward.style.display = 'none'; btnStop.style.display = 'none';
                     startCountdown();
-                } else {
-                    togglePause();
-                }
+                } else togglePause();
             }
 
-            // ==============================
-            // 18. ADJUST VALUE
-            // ==============================
             function isRunning() { return timerState.status !== 'idle' && timerState.status !== 'finished'; }
 
             function adjustValue(el, delta, min, max) {
                 if (isRunning()) return;
                 var val = parseInt(el.textContent, 10) + delta;
-                if (val < min) val = min;
-                if (val > max) val = max;
+                if (val < min) val = min; if (val > max) val = max;
                 el.textContent = val;
                 if (timerState.status === 'idle' || timerState.status === 'finished') {
-                    loadSettingsIntoState();
-                    resetUI();
-                    updateUI();
+                    loadSettingsIntoState(); resetUI(); updateUI();
                 }
             }
 
-            // ==============================
-            // 19. EVENTI
-            // ==============================
+            // EVENTI CONTROLLI IMPOSTAZIONI
             document.getElementById('dec-work').addEventListener('click', function() { adjustValue(valWork, -1, 3, 300); });
             document.getElementById('inc-work').addEventListener('click', function() { adjustValue(valWork, 1, 3, 300); });
             document.getElementById('dec-rest').addEventListener('click', function() { adjustValue(valRest, -1, 1, 300); });
@@ -1637,15 +1583,11 @@
             btnSkipForward.addEventListener('click', skipForward);
             btnStop.addEventListener('click', stopAll);
 
-            // ==============================
-            // 20. WAKE LOCK
-            // ==============================
+            // WAKE LOCK
             if ('wakeLock' in navigator) {
                 var wl = null;
                 var reqLock = function() {
-                    try {
-                        navigator.wakeLock.request('screen').then(function(lock) { wl = lock; }).catch(function() {});
-                    } catch (e) {}
+                    try { navigator.wakeLock.request('screen').then(function(lock) { wl = lock; }).catch(function() {}); } catch (e) {}
                 };
                 reqLock();
                 document.addEventListener('visibilitychange', function() {
@@ -1653,11 +1595,9 @@
                 });
             }
 
-            // ==============================
-            // 21. INIT
-            // ==============================
+            // INIT
             loadTickState();
-            loadCustomPresets();
+            loadLibraryPresets();
             loadPreset('hiit');
         });
     </script>
