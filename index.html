@@ -1461,7 +1461,11 @@
                 if (remaining > 0) totalElapsed += remaining;
                 stopTimer(); stopTick();
                 var s = timerState.status;
-                if (s === 'work') {
+                if (s === 'countdown') {
+                    playBeep(1200, 80);
+                    triggerVibration([200]);
+                    startWorkPhase();
+                } else if (s === 'work') {
                     playGong(); triggerVibration([200]);
                     if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
                     else {
@@ -1476,7 +1480,7 @@
                     playBeep(1200, 80); triggerVibration([100]); startWorkPhase();
                 } else if (s === 'extra') {
                     playBeep(1000, 200); triggerVibration([100]); startWorkPhase();
-                } else if (s === 'countdown') startWorkPhase();
+                }
                 updateUI();
             }
 
