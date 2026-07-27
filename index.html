@@ -22,14 +22,14 @@
             font-family: -apple-system, 'Helvetica Neue', sans-serif;
             height: 100%;
             width: 100%;
-            overflow: hidden; /* Evita doppio scroll */
+            overflow: hidden;
         }
         #app {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* non più space-between */
-            min-height: 100dvh; /* altezza dinamica per iOS */
+            justify-content: flex-start;
+            min-height: 100dvh;
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
@@ -151,7 +151,6 @@
         }
 
         /* ==================== IMPOSTAZIONI DENTRO IL DRAWER ==================== */
-        /* (Identiche a prima, non le riscrivo per brevità, sono copiate sotto) */
         #drawer .row {
             display: flex;
             justify-content: space-between;
@@ -375,9 +374,9 @@
             padding: 4px 0;
         }
 
-        /* ==================== TIMER DISPLAY - FLESSIBILE ==================== */
+        /* ==================== TIMER DISPLAY ==================== */
         #timer-display {
-            flex: 1 1 auto; /* occupa lo spazio disponibile */
+            flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -425,7 +424,6 @@
             margin: 2px 0 2px 0;
         }
 
-        /* ANELLI CONCENTRICI - ADATTIVI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
@@ -853,9 +851,6 @@
     </div>
 
     <script>
-        // ====================================================
-        // JavaScript (IDENTICO a prima, nessuna modifica)
-        // ====================================================
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
@@ -1479,7 +1474,7 @@
                         vibrate([100]);
                         stopTick();
                         startRestInterval();
-                        btnStart.textContent = '⏸ PAUSA';
+                        btnStart.textContent = 'PAUSA';
                         btnStart.className = 'ctrl-btn running';
                     }
                 } else if (s === 'rest') {
@@ -1493,7 +1488,7 @@
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
-                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
                 } else if (s === 'extra') {
                     timerState.status = 'work';
@@ -1506,7 +1501,7 @@
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
-                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
                 } else if (s === 'countdown') {
                     // non fare nulla
@@ -1579,7 +1574,7 @@
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) {
                     timerState.isPaused = false;
-                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
                     var s = timerState.status;
                     if (s === 'work') startWorkInterval();
@@ -1588,7 +1583,7 @@
                     else if (s === 'countdown') startCountdownInterval();
                 } else {
                     timerState.isPaused = true;
-                    btnStart.textContent = '▶ RIPRENDI';
+                    btnStart.textContent = 'RIPRENDI';
                     btnStart.className = 'ctrl-btn idle';
                     stopTimer();
                     stopTick();
@@ -1674,7 +1669,7 @@
                     timerState.extraTriggeredThisRound = false;
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
-                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
                     btnSkipBack.style.display = 'none';
                     btnSkipForward.style.display = 'none';
@@ -1754,7 +1749,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer - layout completamente adattivo');
+            console.log('✅ KrioPlanet Timer - icone rimosse e font uniformato');
         });
     </script>
 </body>
