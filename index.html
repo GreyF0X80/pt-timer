@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0b0b0b">
     <title>KrioPlanet Timer</title>
     <style>
-        /* ==================== RESET E GLOBALI ==================== */
+        /* ==================== RESET ==================== */
         * {
             margin: 0;
             padding: 0;
@@ -22,24 +22,24 @@
             font-family: -apple-system, 'Helvetica Neue', sans-serif;
             height: 100%;
             width: 100%;
-            overflow: hidden;
+            overflow: hidden; /* Evita doppio scroll */
         }
         #app {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            height: 100vh;
+            justify-content: flex-start; /* non più space-between */
+            min-height: 100dvh; /* altezza dinamica per iOS */
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            padding: 10px 16px 4px 16px; /* RIDOTTO padding inferiore e superiore */
+            padding: 8px 16px 4px 16px;
             background: #0b0b0b;
             overflow-y: auto;
             overflow-x: hidden;
         }
 
-        /* ==================== LOGO HEADER (sempre visibile) ==================== */
+        /* ==================== LOGO HEADER ==================== */
         #logo-header {
             position: fixed;
             top: 12px;
@@ -75,7 +75,7 @@
             white-space: nowrap;
         }
 
-        /* ==================== DRAWER LATERALE ==================== */
+        /* ==================== DRAWER ==================== */
         #drawer {
             position: fixed;
             top: 0;
@@ -151,6 +151,7 @@
         }
 
         /* ==================== IMPOSTAZIONI DENTRO IL DRAWER ==================== */
+        /* (Identiche a prima, non le riscrivo per brevità, sono copiate sotto) */
         #drawer .row {
             display: flex;
             justify-content: space-between;
@@ -252,7 +253,6 @@
             transform: translateX(18px);
         }
 
-        /* ==================== PRESET DENTRO IL DRAWER ==================== */
         #drawer #preset-bar {
             display: flex;
             flex-wrap: wrap;
@@ -375,18 +375,18 @@
             padding: 4px 0;
         }
 
-        /* ==================== TIMER DISPLAY ==================== */
+        /* ==================== TIMER DISPLAY - FLESSIBILE ==================== */
         #timer-display {
-            flex: 1 1 auto;
+            flex: 1 1 auto; /* occupa lo spazio disponibile */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             width: 100%;
             position: relative;
-            min-height: 120px; /* ridotto minimo per compattare */
-            padding: 2px 0; /* ridotto padding verticale */
-            margin-top: 2px; /* ridotto margine */
+            min-height: 100px;
+            padding: 4px 0;
+            margin: 4px 0;
         }
 
         #rounds-info {
@@ -425,14 +425,14 @@
             margin: 2px 0 2px 0;
         }
 
-        /* ANELLI CONCENTRICI */
+        /* ANELLI CONCENTRICI - ADATTIVI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(220px, 70vw, 680px);
-            height: clamp(220px, 70vw, 680px);
+            width: clamp(180px, 65vw, 680px);
+            height: clamp(180px, 65vw, 680px);
             pointer-events: none;
             z-index: 0;
         }
@@ -449,9 +449,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1px 0 1px 0; /* ridotto padding */
+            padding: 2px 0 2px 0;
             flex-shrink: 0;
-            min-height: 12px; /* ridotto minimo */
+            min-height: 14px;
         }
         #progress-dots {
             display: flex;
@@ -478,13 +478,13 @@
             background: #5ac8fa;
         }
 
-        /* ==================== CONTROLLI - PULSANTI ALLINEATI ==================== */
+        /* ==================== CONTROLLI ==================== */
         #controls {
             width: 100%;
             display: flex;
             justify-content: center;
             gap: 6px;
-            padding: 2px 0 4px 0; /* ridotto padding superiore e inferiore */
+            padding: 4px 0 6px 0;
             flex-wrap: wrap;
             flex-shrink: 0;
         }
@@ -596,7 +596,7 @@
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 420px) {
             #app {
-                padding: 6px 10px 2px 10px; /* ridotto padding per iPhone */
+                padding: 6px 10px 2px 10px;
             }
             #logo-header {
                 top: 8px;
@@ -622,8 +622,8 @@
                 font-size: clamp(3rem, 15vw, 6rem);
             }
             #progress-ring-container {
-                width: clamp(170px, 60vw, 280px);
-                height: clamp(170px, 60vw, 280px);
+                width: clamp(140px, 55vw, 250px);
+                height: clamp(140px, 55vw, 250px);
             }
             #phase-label {
                 font-size: 0.8rem;
@@ -667,15 +667,15 @@
                 padding: 2px 6px;
             }
             #timer-display {
-                min-height: 90px;
-                padding: 0;
+                min-height: 80px;
+                padding: 2px 0;
             }
             #progress-dots-container {
                 min-height: 10px;
                 padding: 0;
             }
             #controls {
-                padding: 2px 0 2px 0;
+                padding: 2px 0 4px 0;
             }
         }
 
@@ -730,7 +730,7 @@
     </style>
 </head>
 <body>
-    <!-- ==================== LOGO HEADER (sempre visibile) ==================== -->
+    <!-- ==================== LOGO HEADER ==================== -->
     <button id="logo-header" aria-label="Apri menu KrioPlanet">
         <img src="Logo-Blu.svg" alt="KrioPlanet" id="logo-img">
         <span class="brand-name">KRIOPLANET</span>
@@ -748,7 +748,6 @@
             </div>
             <button id="drawer-close" aria-label="Chiudi menu">✕</button>
         </div>
-
         <!-- ===== IMPOSTAZIONI ===== -->
         <div id="setup-inside-drawer">
             <div class="row">
@@ -836,7 +835,7 @@
             </svg>
         </div>
 
-        <!-- PALLINI DI AVANZAMENTO -->
+        <!-- PALLINI -->
         <div id="progress-dots-container">
             <div id="progress-dots"></div>
         </div>
@@ -847,7 +846,6 @@
             <button id="btn-skip-back" class="ctrl-btn">◀ IND.</button>
             <button id="btn-skip-forward" class="ctrl-btn">▶ AVV.</button>
             <button id="btn-stop" class="ctrl-btn">STOP</button>
-            <!-- Nascondo i vecchi -->
             <button id="btn-pause" style="display:none;"></button>
             <button id="btn-skip" style="display:none;"></button>
             <button id="btn-reset" style="display:none;"></button>
@@ -856,7 +854,7 @@
 
     <script>
         // ====================================================
-        // JavaScript (IDENTICO al tuo, nessuna modifica)
+        // JavaScript (IDENTICO a prima, nessuna modifica)
         // ====================================================
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
@@ -1756,7 +1754,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer con layout ottimizzato');
+            console.log('✅ KrioPlanet Timer - layout completamente adattivo');
         });
     </script>
 </body>
