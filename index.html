@@ -304,6 +304,7 @@
             padding: 4px 0;
         }
 
+        /* TIMER DISPLAY - RIMOSSO IL POSIZIONAMENTO DEI DOT QUI */
         #timer-display {
             flex: 1 1 auto;
             display: flex;
@@ -313,7 +314,7 @@
             width: 100%;
             position: relative;
             min-height: 200px;
-            padding: 24px 0;
+            padding: 20px 0;
             margin: 2px 0;
         }
 
@@ -353,33 +354,7 @@
             margin: 2px 0 4px 0;
         }
 
-        #progress-dots {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            z-index: 2;
-            flex-wrap: wrap;
-            max-width: 90%;
-            margin: 6px 0 4px 0;
-        }
-        .dot {
-            width: clamp(8px, 1.5vw, 14px);
-            height: clamp(8px, 1.5vw, 14px);
-            border-radius: 50%;
-            background: #333;
-            transition: background 0.2s ease;
-        }
-        .dot.done {
-            background: #34c759;
-        }
-        .dot.current {
-            background: #ffcc00;
-        }
-        .dot.extra-dot {
-            background: #5ac8fa;
-        }
-
-        /* ANELLI PIÙ GRANDI */
+        /* ANELLI CONCENTRICI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
@@ -397,7 +372,42 @@
             transition: stroke-dashoffset 0.15s linear, stroke 0.3s ease;
         }
 
-        /* CONTROLLI - senza simboli Unicode che generano emoji su iOS */
+        /* PALLINI DI AVANZAMENTO (ORA FUORI DAI CERCHI, SOPRA I PULSANTI) */
+        #progress-dots-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px 0 4px 0;
+            flex-shrink: 0;
+            min-height: 24px;
+        }
+        #progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            max-width: 92%;
+        }
+        .dot {
+            width: clamp(8px, 1.5vw, 14px);
+            height: clamp(8px, 1.5vw, 14px);
+            border-radius: 50%;
+            background: #333;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+        }
+        .dot.done {
+            background: #34c759;
+        }
+        .dot.current {
+            background: #ffcc00;
+        }
+        .dot.extra-dot {
+            background: #5ac8fa;
+        }
+
+        /* CONTROLLI */
         #controls {
             width: 100%;
             display: flex;
@@ -564,6 +574,10 @@
                 font-size: 0.5rem;
                 padding: 2px 6px;
             }
+            .dot {
+                width: 6px;
+                height: 6px;
+            }
         }
 
         @media (min-width: 600px) and (max-width: 1024px) {
@@ -593,6 +607,10 @@
             .ctrl-btn {
                 font-size: 1.2rem;
                 padding: 12px 18px;
+            }
+            .dot {
+                width: 14px;
+                height: 14px;
             }
         }
     </style>
@@ -632,7 +650,6 @@
             <div id="rounds-info">Giro 0 / 12</div>
             <div id="big-number">30</div>
             <div id="phase-label">PRONTO</div>
-            <div id="progress-dots"></div>
             <svg id="progress-ring-container" viewBox="0 0 100 100">
                 <circle id="ring-outer-bg" cx="50" cy="50" r="46" fill="none" stroke="#2a2a2a" stroke-width="6" />
                 <circle id="ring-outer" cx="50" cy="50" r="46" fill="none" stroke="#ff6a00" stroke-width="6"
@@ -643,6 +660,11 @@
                     stroke-linecap="round" stroke-dasharray="245.04" stroke-dashoffset="245.04"
                     transform="rotate(-90 50 50)" />
             </svg>
+        </div>
+
+        <!-- PALLINI DI AVANZAMENTO (ORA FUORI DAI CERCHI) -->
+        <div id="progress-dots-container">
+            <div id="progress-dots"></div>
         </div>
 
         <div id="controls">
@@ -933,7 +955,7 @@
             newPresetName.addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomPreset(newPresetName
                     .value); });
 
-            // === UI UPDATE ===
+            // === UI UPDATE (pallini ora disegnati nel container esterno) ===
             function updateDots() {
                 var total = timerState.totalRounds || 1;
                 var done = timerState.currentRound;
@@ -941,10 +963,14 @@
                 for (var i = 1; i <= total; i++) {
                     var dot = document.createElement('span');
                     dot.className = 'dot';
-                    if (i < done) dot.classList.add('done');
-                    else if (i === done && timerState.status !== 'idle' && timerState.status !== 'finished') {
-                        if (timerState.status === 'extra') dot.classList.add('extra-dot');
-                        else dot.classList.add('current');
+                    if (i < done) {
+                        dot.classList.add('done');
+                    } else if (i === done && timerState.status !== 'idle' && timerState.status !== 'finished') {
+                        if (timerState.status === 'extra') {
+                            dot.classList.add('extra-dot');
+                        } else {
+                            dot.classList.add('current');
+                        }
                     }
                     progressDots.appendChild(dot);
                 }
@@ -1030,7 +1056,6 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
-                        // RIMOSSO playBeep(800,80) - ora il suono parte da startWorkPhase()
                         startWorkPhase();
                         return;
                     }
@@ -1129,7 +1154,6 @@
             }
 
             function startWorkPhase() {
-                // === SUONO ALL'INIZIO DI OGNI LAVORO (compreso il primo) ===
                 playBeep(800, 80);
                 stopTimer();
                 timerState.status = 'work';
@@ -1213,7 +1237,7 @@
                 vibrate([100, 50, 100, 50, 300]);
             }
 
-            // === SKIP BACK (CORRETTO) ===
+            // === SKIP BACK ===
             function skipBack() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
@@ -1269,7 +1293,7 @@
                 }
             }
 
-            // === SKIP FORWARD (INVARIATO) ===
+            // === SKIP FORWARD ===
             function skipForward() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
@@ -1494,7 +1518,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - suono lavoro uniforme e cerchi più grandi');
+            console.log('✅ PT Timer - pallini spostati fuori dai cerchi');
         });
     </script>
 </body>
