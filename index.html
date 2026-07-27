@@ -57,20 +57,6 @@
             position: relative;
         }
 
-        /* ==================== FLASH OVERLAY ==================== */
-        .flash-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #ffffff;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 9999;
-            transition: opacity 0.1s ease-out;
-        }
-        .flash-active {
-            opacity: 0.75;
-        }
-
         /* ==================== LOGO HEADER ==================== */
         #logo-header {
             position: fixed;
@@ -646,8 +632,6 @@
     </style>
 </head>
 <body>
-    <!-- FLASH OVERLAY (AGGIUNTO PER EFFETTO NOTIFICA VISIVA) -->
-    <div id="flash-overlay" class="flash-overlay"></div>
 
     <!-- ==================== LOGO HEADER ==================== -->
     <button id="logo-header" aria-label="Apri menu KrioPlanet">
@@ -775,14 +759,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
-            // Funzione extra non distruttiva per il flash visivo
-            function triggerFlash() {
-                var overlay = document.getElementById('flash-overlay');
-                if (!overlay) return;
-                overlay.classList.add('flash-active');
-                setTimeout(function() {
-                    overlay.classList.remove('flash-active');
-                }, 120);
+            // OPZIONE A: FUNZIONE VIBRAZIONE APTICA PER FEEDBACK CONTINUO
+            function triggerVibration(pattern) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(pattern);
+                }
             }
 
             // ==============================
@@ -943,8 +924,6 @@
             }
 
             function playTickMetronome() { playBeep(1200, 30); }
-
-            function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
 
             // ==============================
             // 6. CALCOLO DURATA TOTALE
@@ -1225,7 +1204,7 @@
                         timerState.currentTime = 0;
                         updateUI();
                         playGong();
-                        vibrate([300, 100, 300]);
+                        triggerVibration([300, 100, 300]);
                         if (timerState.currentRound >= timerState.totalRounds) {
                             finishWorkout();
                         } else {
@@ -1250,7 +1229,7 @@
                         timerState.currentTime = 0;
                         updateUI();
                         playBeep(1200, 80);
-                        vibrate([200, 100, 200]);
+                        triggerVibration([200, 100, 200]);
                         var shouldTriggerExtra = (settings.extraEvery > 0) &&
                             (timerState.currentRound % settings.extraEvery === 0) &&
                             !timerState.extraTriggeredThisRound &&
@@ -1279,7 +1258,7 @@
                         timerState.currentTime = 0;
                         updateUI();
                         playBeep(1000, 400);
-                        vibrate([300]);
+                        triggerVibration([300]);
                         startWorkPhase();
                         return;
                     }
@@ -1292,7 +1271,7 @@
             // ==============================
             function startCountdown() {
                 stopTimer();
-                triggerFlash();
+                triggerVibration([100, 100, 100]);
                 timerState.status = 'countdown';
                 timerState.currentTime = 3;
                 timerState.maxTime = 3;
@@ -1302,13 +1281,12 @@
                 btnSkipForward.style.display = 'none';
                 btnStop.style.display = 'none';
                 updateUI();
-                vibrate([100, 100, 100]);
                 startCountdownInterval();
             }
 
             function startWorkPhase() {
                 stopTimer();
-                triggerFlash();
+                triggerVibration([200]);
                 timerState.status = 'work';
                 timerState.currentRound += 1;
                 timerState.currentTime = settings.work;
@@ -1322,13 +1300,12 @@
                 btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
                 updateUI();
-                vibrate([200]);
                 startWorkInterval();
             }
 
             function startRestPhase() {
                 stopTimer();
-                triggerFlash();
+                triggerVibration([100]);
                 timerState.status = 'rest';
                 timerState.currentTime = settings.rest;
                 timerState.maxTime = settings.rest;
@@ -1340,14 +1317,13 @@
                 btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
                 updateUI();
-                vibrate([100]);
                 stopTick();
                 startRestInterval();
             }
 
             function startExtraPhase() {
                 stopTimer();
-                triggerFlash();
+                triggerVibration([100, 50, 100]);
                 timerState.status = 'extra';
                 timerState.currentTime = settings.extraDur;
                 timerState.maxTime = settings.extraDur;
@@ -1360,14 +1336,13 @@
                 btnStop.style.display = 'flex';
                 updateUI();
                 playExtraAlert();
-                vibrate([100, 50, 100]);
                 stopTick();
                 startExtraInterval();
             }
 
             function finishWorkout() {
                 stopTimer();
-                triggerFlash();
+                triggerVibration([100, 50, 100, 50, 300]);
                 timerState.status = 'finished';
                 timerState.currentTime = 0;
                 phaseLabel.textContent = 'COMPLETATO';
@@ -1390,7 +1365,6 @@
                 setTimeout(function() { playBeep(523, 200); }, 100);
                 setTimeout(function() { playBeep(659, 200); }, 300);
                 setTimeout(function() { playBeep(784, 400); }, 500);
-                vibrate([100, 50, 100, 50, 300]);
             }
 
             // ==============================
@@ -1414,7 +1388,7 @@
                         btnSkipForward.textContent = '▶ AVV.';
                         btnStop.style.display = 'flex';
                         updateUI();
-                        vibrate([100]);
+                        triggerVibration([100]);
                         stopTick();
                         startRestInterval();
                         btnStart.textContent = 'PAUSA';
@@ -1429,7 +1403,7 @@
                     btnSkipForward.textContent = '▶ AVV.';
                     btnStop.style.display = 'flex';
                     updateUI();
-                    vibrate([200]);
+                    triggerVibration([200]);
                     startWorkInterval();
                     btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
@@ -1442,7 +1416,7 @@
                     btnSkipForward.textContent = '▶ AVV.';
                     btnStop.style.display = 'flex';
                     updateUI();
-                    vibrate([200]);
+                    triggerVibration([200]);
                     startWorkInterval();
                     btnStart.textContent = 'PAUSA';
                     btnStart.className = 'ctrl-btn running';
@@ -1464,7 +1438,7 @@
                 var s = timerState.status;
                 if (s === 'work') {
                     playGong();
-                    vibrate([200]);
+                    triggerVibration([200]);
                     if (timerState.currentRound >= timerState.totalRounds) {
                         finishWorkout();
                     } else {
@@ -1481,11 +1455,11 @@
                     }
                 } else if (s === 'rest') {
                     playBeep(1200, 80);
-                    vibrate([100]);
+                    triggerVibration([100]);
                     startWorkPhase();
                 } else if (s === 'extra') {
                     playBeep(1000, 200);
-                    vibrate([100]);
+                    triggerVibration([100]);
                     startWorkPhase();
                 } else if (s === 'countdown') {
                     startWorkPhase();
@@ -1687,7 +1661,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer - UI modernizzata e preservate tutte le funzionalità originali');
+            console.log('✅ KrioPlanet Timer - Opzione A (Vibrazione continua) integrata con successo');
         });
     </script>
 </body>
