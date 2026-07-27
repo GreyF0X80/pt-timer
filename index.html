@@ -316,8 +316,8 @@
             align-items: center;
             width: 100%;
             position: relative;
-            min-height: 180px;
-            padding: 6px 0;
+            min-height: 200px;
+            padding: 20px 0;  /* Più padding per evitare che gli anelli tocchino i bordi */
             margin: 2px 0;
         }
 
@@ -383,14 +383,14 @@
             background: #5ac8fa;
         }
 
-        /* ANELLI CONCENTRICI - RIDOTTI PER EVITARE SOVRAPPOSIZIONI */
+        /* ANELLI CONCENTRICI - ORA PIÙ GRANDI E ADATTIVI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: min(60vw, 380px);
-            height: min(60vw, 380px);
+            width: clamp(200px, 60vw, 550px);
+            height: clamp(200px, 60vw, 550px);
             pointer-events: none;
             z-index: 0;
         }
@@ -401,7 +401,7 @@
             transition: stroke-dashoffset 0.15s linear, stroke 0.3s ease;
         }
 
-        /* CONTROLLI - NUOVI PULSANTI STILE STEREO */
+        /* CONTROLLI - STILE STEREO */
         #controls {
             width: 100%;
             display: flex;
@@ -483,7 +483,7 @@
             font-size: 1rem;
         }
 
-        /* Nascondo il vecchio btn-skip e btn-reset (li sostituisco) */
+        /* Nascondo vecchi pulsanti */
         #btn-skip {
             display: none !important;
         }
@@ -553,8 +553,8 @@
                 font-size: clamp(3rem, 15vw, 6rem);
             }
             #progress-ring-container {
-                width: min(65vw, 160px);
-                height: min(65vw, 160px);
+                width: clamp(160px, 65vw, 300px);
+                height: clamp(160px, 65vw, 300px);
             }
             #phase-label {
                 font-size: 0.8rem;
@@ -574,8 +574,8 @@
         /* ADATTAMENTI PER TABLET E SCHERMI MEDI */
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
-                width: min(50vw, 320px);
-                height: min(50vw, 320px);
+                width: clamp(300px, 55vw, 480px);
+                height: clamp(300px, 55vw, 480px);
             }
             #big-number {
                 font-size: clamp(6rem, 15vw, 10rem);
@@ -585,8 +585,8 @@
         /* ADATTAMENTI PER PC E SCHERMI GRANDI */
         @media (min-width: 1200px) {
             #progress-ring-container {
-                width: 420px;
-                height: 420px;
+                width: 550px;
+                height: 550px;
             }
             #big-number {
                 font-size: 14rem;
@@ -657,7 +657,7 @@
             <button id="btn-skip-back" class="ctrl-btn">◀ IND.</button>
             <button id="btn-skip-forward" class="ctrl-btn">▶ AV.</button>
             <button id="btn-stop" class="ctrl-btn">⏹ STOP</button>
-            <!-- Nascondo i vecchi pulsanti -->
+            <!-- Nascondo i vecchi -->
             <button id="btn-pause" style="display:none;"></button>
             <button id="btn-skip" style="display:none;"></button>
             <button id="btn-reset" style="display:none;"></button>
@@ -754,7 +754,6 @@
             }
 
             function playCountdownTick(seconds) {
-                // Stesso suono per tutti i secondi del countdown
                 playBeep(800, 80);
             }
 
@@ -1038,7 +1037,6 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
-                        // Suono all'inizio del primo lavoro (dopo countdown)
                         playBeep(800, 80);
                         startWorkPhase();
                         return;
@@ -1220,12 +1218,10 @@
                 vibrate([100, 50, 100, 50, 300]);
             }
 
-            // === SKIP BACK (RICOMINCIA FASE CORRENTE) ===
+            // === SKIP BACK ===
             function skipBack() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
-                // Ricomincia la fase corrente: resetta il timer al suo valore massimo
-                // (non cambia il round corrente)
                 var s = timerState.status;
                 if (s === 'work') {
                     timerState.currentTime = settings.work;
@@ -1240,23 +1236,17 @@
                     timerState.currentTime = 3;
                     timerState.maxTime = 3;
                 }
-                // Non modificare totalElapsed perché il tempo è già stato contato,
-                // ma se vogliamo che l'anello esterno tenga conto del "riavvolgimento",
-                // dovremmo sottrarre il tempo già trascorso della fase.
-                // Semplifichiamo: l'anello esterno non viene modificato.
                 updateUI();
-                // Ricomincia l'intervallo
                 if (s === 'work') startWorkInterval();
                 else if (s === 'rest') startRestInterval();
                 else if (s === 'extra') startExtraInterval();
                 else if (s === 'countdown') startCountdownInterval();
             }
 
-            // === SKIP FORWARD (SALTA ALLA FASE SUCCESSIVA) ===
+            // === SKIP FORWARD ===
             function skipForward() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
                 if (timerState.isPaused) return;
-                // Aggiunge il tempo rimanente a totalElapsed per mantenere il progresso
                 var remaining = timerState.currentTime;
                 if (remaining > 0) totalElapsed += remaining;
                 stopTimer();
@@ -1293,7 +1283,7 @@
                 updateUI();
             }
 
-            // === STOP (RESET COMPLETO) ===
+            // === STOP ===
             function stopAll() {
                 stopTimer();
                 stopTick();
@@ -1333,7 +1323,7 @@
                 }
             }
 
-            // === RESET (usato solo da stopAll) ===
+            // === RESET (usato da stopAll) ===
             function resetAll() {
                 stopAll();
             }
@@ -1478,7 +1468,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - suoni corretti e nuovi controlli stereo');
+            console.log('✅ PT Timer - anelli grandi e adattivi');
         });
     </script>
 </body>
