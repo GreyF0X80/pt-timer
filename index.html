@@ -313,7 +313,7 @@
             width: 100%;
             position: relative;
             min-height: 200px;
-            padding: 20px 0;
+            padding: 24px 0;
             margin: 2px 0;
         }
 
@@ -379,13 +379,14 @@
             background: #5ac8fa;
         }
 
+        /* ANELLI PIÙ GRANDI */
         #progress-ring-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(200px, 60vw, 550px);
-            height: clamp(200px, 60vw, 550px);
+            width: clamp(220px, 70vw, 650px);
+            height: clamp(220px, 70vw, 650px);
             pointer-events: none;
             z-index: 0;
         }
@@ -547,8 +548,8 @@
                 font-size: clamp(3rem, 15vw, 6rem);
             }
             #progress-ring-container {
-                width: clamp(160px, 65vw, 300px);
-                height: clamp(160px, 65vw, 300px);
+                width: clamp(180px, 65vw, 300px);
+                height: clamp(180px, 65vw, 300px);
             }
             #phase-label {
                 font-size: 0.8rem;
@@ -567,8 +568,8 @@
 
         @media (min-width: 600px) and (max-width: 1024px) {
             #progress-ring-container {
-                width: clamp(300px, 55vw, 480px);
-                height: clamp(300px, 55vw, 480px);
+                width: clamp(320px, 60vw, 550px);
+                height: clamp(320px, 60vw, 550px);
             }
             #big-number {
                 font-size: clamp(6rem, 15vw, 10rem);
@@ -577,8 +578,8 @@
 
         @media (min-width: 1200px) {
             #progress-ring-container {
-                width: 550px;
-                height: 550px;
+                width: 650px;
+                height: 650px;
             }
             #big-number {
                 font-size: 14rem;
@@ -1029,7 +1030,7 @@
                     if (timerState.currentTime <= 0) {
                         timerState.currentTime = 0;
                         updateUI();
-                        playBeep(800, 80);
+                        // RIMOSSO playBeep(800,80) - ora il suono parte da startWorkPhase()
                         startWorkPhase();
                         return;
                     }
@@ -1128,6 +1129,8 @@
             }
 
             function startWorkPhase() {
+                // === SUONO ALL'INIZIO DI OGNI LAVORO (compreso il primo) ===
+                playBeep(800, 80);
                 stopTimer();
                 timerState.status = 'work';
                 timerState.currentRound += 1;
@@ -1217,27 +1220,13 @@
 
                 var s = timerState.status;
 
-                // Se siamo in LAVORO e il tempo non è ancora stato resettato (cioè è > 0 e diverso dal massimo),
-                // resettiamo il tempo della fase corrente (torna all'inizio del lavoro)
-                if (s === 'work' && timerState.currentTime > 0 && timerState.currentTime < timerState.maxTime) {
-                    timerState.currentTime = settings.work;
-                    timerState.maxTime = settings.work;
-                    updateUI();
-                    startWorkInterval();
-                    return;
-                }
-
-                // Altrimenti: torniamo indietro di un round (fase precedente)
-                // Se siamo in LAVORO e il round è > 1, decrementiamo il round e andiamo al RECUPERO del round precedente
-                // Se siamo in RECUPERO o EXTRA, andiamo al LAVORO del round corrente (o precedente se necessario)
                 if (s === 'work') {
                     if (timerState.currentRound > 1) {
                         timerState.currentRound -= 1;
-                        // Vai al recupero del round precedente
                         timerState.status = 'rest';
                         timerState.currentTime = settings.rest;
                         timerState.maxTime = settings.rest;
-                        timerState.extraTriggeredThisRound = false; // reset flag
+                        timerState.extraTriggeredThisRound = false;
                         phaseLabel.textContent = 'RECUPERO';
                         btnSkipBack.textContent = '◀ IND.';
                         btnSkipForward.textContent = '▶ AVV.';
@@ -1246,13 +1235,10 @@
                         vibrate([100]);
                         stopTick();
                         startRestInterval();
-                        // Aggiorna il testo del pulsante START
                         btnStart.textContent = '⏸ PAUSA';
                         btnStart.className = 'ctrl-btn running';
                     }
-                    // se round == 1, non fare nulla (non si può tornare indietro)
                 } else if (s === 'rest') {
-                    // Torna al lavoro del round corrente (resetta il tempo del lavoro)
                     timerState.status = 'work';
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
@@ -1263,8 +1249,9 @@
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
+                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.className = 'ctrl-btn running';
                 } else if (s === 'extra') {
-                    // Torna al lavoro del round corrente (reset del tempo)
                     timerState.status = 'work';
                     timerState.currentTime = settings.work;
                     timerState.maxTime = settings.work;
@@ -1275,8 +1262,10 @@
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
+                    btnStart.textContent = '⏸ PAUSA';
+                    btnStart.className = 'ctrl-btn running';
                 } else if (s === 'countdown') {
-                    // Non si può tornare indietro durante il countdown
+                    // non fare nulla
                 }
             }
 
@@ -1505,7 +1494,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ PT Timer - pulsante IND. corretto e icone rimosse');
+            console.log('✅ PT Timer - suono lavoro uniforme e cerchi più grandi');
         });
     </script>
 </body>
