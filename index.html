@@ -5,10 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0b0b0b">
+    <meta name="theme-color" content="#050b14">
     <title>KrioPlanet Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ==================== RESET ==================== */
+        /* ==================== PALETTE KRIOPLANET & RESET ==================== */
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: rgba(15, 30, 46, 0.75);
+            --primary-cyan: #00f0ff;
+            --primary-blue: #0072ff;
+            --glow-cyan: rgba(0, 240, 255, 0.35);
+            --work-green: #38ef7d;
+            --rest-red: #ff4d6d;
+            --warning-yellow: #ffc107;
+            --extra-blue: #00b4d8;
+            --text-main: #ffffff;
+            --text-muted: #8a99ad;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,14 +31,16 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+
         html, body {
-            background: #0b0b0b;
-            color: white;
-            font-family: -apple-system, 'Helvetica Neue', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #0d1e30 0%, var(--bg-dark) 100%);
+            color: var(--text-main);
+            font-family: 'Poppins', -apple-system, 'Helvetica Neue', sans-serif;
             height: 100%;
             width: 100%;
             overflow: hidden;
         }
+
         #app {
             display: flex;
             flex-direction: column;
@@ -33,10 +50,25 @@
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            padding: 8px 16px 4px 16px;
-            background: #0b0b0b;
+            padding: 12px 16px 8px 16px;
+            background: transparent;
             overflow-y: auto;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ==================== FLASH OVERLAY ==================== */
+        .flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #ffffff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.1s ease-out;
+        }
+        .flash-active {
+            opacity: 0.75;
         }
 
         /* ==================== LOGO HEADER ==================== */
@@ -49,29 +81,33 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: transparent;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 12px;
-            transition: background 0.2s ease;
+            background: rgba(15, 30, 46, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px var(--glow-cyan);
+            transition: all 0.2s ease;
             text-decoration: none;
         }
         #logo-header:active {
             transform: scale(0.95);
         }
         #logo-header img {
-            height: 44px;
+            height: 36px;
             width: auto;
             display: block;
-            filter: brightness(0) invert(1);
+            filter: brightness(0) invert(1) drop-shadow(0 0 4px var(--primary-cyan));
             transition: filter 0.3s ease;
         }
         #logo-header .brand-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 1.5px;
-            transition: color 0.3s ease;
+            background: linear-gradient(45deg, #fff, var(--primary-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
             white-space: nowrap;
         }
 
@@ -80,17 +116,20 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 320px;
+            width: 340px;
             max-width: 85vw;
             height: 100%;
-            background: #f4f8fc;
+            background: rgba(10, 20, 32, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 240, 255, 0.2);
             z-index: 1100;
             transform: translateX(-100%);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
-            padding: 20px 18px 30px 18px;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-            color: #1a2a3a;
+            padding: 24px 20px 30px 20px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+            color: var(--text-main);
         }
         #drawer.open {
             transform: translateX(0);
@@ -102,7 +141,7 @@
             align-items: center;
             margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 2px solid rgba(26, 42, 58, 0.1);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
         }
         #drawer-header .logo-large {
             display: flex;
@@ -110,36 +149,42 @@
             gap: 12px;
         }
         #drawer-header .logo-large img {
-            height: 44px;
+            height: 38px;
             width: auto;
-            filter: none;
+            filter: brightness(0) invert(1) drop-shadow(0 0 4px var(--primary-cyan));
         }
         #drawer-header .logo-large span {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #0b2b3b;
-            letter-spacing: 1.5px;
+            background: linear-gradient(45deg, #fff, var(--primary-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
         }
         #drawer-close {
-            background: transparent;
-            border: none;
-            font-size: 2rem;
-            font-weight: 300;
-            color: #1a2a3a;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 1.2rem;
+            color: var(--primary-cyan);
             cursor: pointer;
-            padding: 4px 8px;
-            line-height: 1;
-            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
         #drawer-close:active {
-            transform: scale(0.8);
+            transform: scale(0.85);
         }
 
         /* ==================== OVERLAY ==================== */
         #overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
             z-index: 1050;
             display: none;
             transition: opacity 0.3s ease;
@@ -155,53 +200,54 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 6px 14px;
-            border-radius: 60px;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 16px;
+            border-radius: 50px;
+            margin-bottom: 8px;
         }
         #drawer .row label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1a2a3a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
             min-width: 50px;
         }
         #drawer .row .controls {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         #drawer .row .controls button {
-            background: #eef2f6;
-            border: none;
-            color: #1a2a3a;
-            width: 28px;
-            height: 28px;
-            border-radius: 28px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--primary-cyan);
+            color: var(--primary-cyan);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             font-size: 1.1rem;
-            font-weight: 300;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             touch-action: manipulation;
-            transition: 0.1s ease;
+            transition: 0.15s ease;
         }
         #drawer .row .controls button:active {
-            background: #d0d8e0;
-            transform: scale(0.92);
+            background: var(--primary-cyan);
+            color: #000;
+            transform: scale(0.9);
         }
         #drawer .row .controls span {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             min-width: 30px;
             text-align: center;
-            color: #0b2b3b;
+            color: var(--primary-cyan);
         }
         #drawer .extra-label {
-            font-size: 0.65rem;
-            color: #666;
+            font-size: 0.7rem;
+            color: var(--text-muted);
             min-width: 25px;
         }
 
@@ -209,169 +255,164 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 6px 16px 6px 14px;
-            border-radius: 60px;
-            margin-bottom: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 16px;
+            border-radius: 50px;
+            margin-bottom: 8px;
         }
         #drawer .toggle-row label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1a2a3a;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 6px;
         }
         #drawer .switch {
             position: relative;
-            width: 40px;
-            height: 22px;
-            background: #ccc;
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 22px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.3s;
             touch-action: manipulation;
             flex-shrink: 0;
         }
         #drawer .switch.active {
-            background: #34c759;
+            background: linear-gradient(90deg, var(--primary-cyan), var(--primary-blue));
+            box-shadow: 0 0 10px var(--glow-cyan);
         }
         #drawer .switch::after {
             content: '';
             position: absolute;
-            top: 2px;
-            left: 2px;
+            top: 3px;
+            left: 3px;
             width: 18px;
             height: 18px;
             background: white;
             border-radius: 50%;
-            transition: transform 0.2s;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #drawer .switch.active::after {
-            transform: translateX(18px);
+            transform: translateX(20px);
         }
 
         #drawer #preset-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
-            margin: 10px 0 6px 0;
+            gap: 6px;
+            margin: 16px 0 10px 0;
         }
         #drawer .preset-btn {
             flex: 1;
-            background: white;
-            border: 1px solid #d0d8e0;
-            color: #1a2a3a;
-            padding: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 6px 0;
             border-radius: 30px;
-            font-size: 0.6rem;
-            font-weight: 700;
+            font-size: 0.7rem;
+            font-weight: 600;
             text-align: center;
             cursor: pointer;
             touch-action: manipulation;
-            transition: 0.1s ease;
+            transition: all 0.2s ease;
             letter-spacing: 0.5px;
-            min-width: 40px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            min-width: 60px;
         }
         #drawer .preset-btn:active {
-            background: #e8eef4;
             transform: scale(0.95);
         }
         #drawer .preset-btn.active {
-            border-color: #007aff;
-            color: #007aff;
-            background: #e3f0ff;
+            border-color: var(--primary-cyan);
+            color: #000;
+            background: var(--primary-cyan);
+            box-shadow: 0 0 12px var(--glow-cyan);
         }
         #drawer .preset-btn.save-btn {
-            border-color: #ffcc00;
-            color: #b38f00;
-            background: #fff8e0;
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+            background: rgba(0, 240, 255, 0.1);
         }
         #drawer .preset-btn.custom-btn {
-            border-color: #5ac8fa;
-            color: #007aff;
-            background: #e3f0ff;
-        }
-        #drawer .preset-btn.delete-btn {
-            border-color: #ff3b30;
-            color: #ff3b30;
-            background: #ffe8e6;
-            flex: 0.2;
-            min-width: 20px;
-            font-size: 0.5rem;
+            border-color: rgba(0, 240, 255, 0.3);
+            color: var(--primary-cyan);
+            background: rgba(0, 240, 255, 0.05);
         }
 
         #drawer #custom-presets-section {
-            margin-top: 4px;
+            margin-top: 10px;
         }
         #drawer #custom-presets-section .label-custom {
-            font-size: 0.55rem;
-            color: #555;
+            font-size: 0.75rem;
+            color: var(--text-muted);
             font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
         #drawer .custom-preset-wrapper {
             display: flex;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
             flex: 1;
-            min-width: 50px;
-            margin-bottom: 4px;
+            min-width: 60px;
+            margin-bottom: 6px;
         }
         #drawer .custom-preset-wrapper .preset-btn {
             flex: 1;
         }
         #drawer .custom-preset-wrapper .delete-btn {
             flex: 0.2;
-            min-width: 18px;
-            font-size: 0.5rem;
-            background: white;
-            border: 1px solid #d0d8e0;
-            color: #ff3b30;
+            min-width: 24px;
+            font-size: 0.65rem;
+            background: rgba(255, 77, 109, 0.15);
+            border: 1px solid var(--rest-red);
+            color: var(--rest-red);
             border-radius: 30px;
             text-align: center;
             cursor: pointer;
             touch-action: manipulation;
-            padding: 4px 0;
-            transition: 0.1s ease;
+            padding: 6px 0;
+            transition: 0.15s ease;
         }
         #drawer .custom-preset-wrapper .delete-btn:active {
-            background: #ffe8e6;
+            background: var(--rest-red);
+            color: white;
             transform: scale(0.95);
         }
 
         #drawer #new-preset-area {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             width: 100%;
-            margin-top: 4px;
+            margin-top: 8px;
         }
         #drawer #new-preset-area input {
             flex: 1;
-            background: white;
-            border: 1px solid #d0d8e0;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 30px;
-            padding: 4px 10px;
-            color: #1a2a3a;
-            font-size: 0.65rem;
+            padding: 6px 14px;
+            color: #fff;
+            font-size: 0.75rem;
             outline: none;
             min-width: 60px;
         }
         #drawer #new-preset-area input::placeholder {
-            color: #999;
+            color: var(--text-muted);
         }
         #drawer #new-preset-area input:focus {
-            border-color: #007aff;
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 8px var(--glow-cyan);
         }
         #drawer #new-preset-area .preset-btn {
-            flex: 0.3;
-            min-width: 40px;
-            font-size: 0.6rem;
-            padding: 4px 0;
+            flex: 0.4;
+            min-width: 50px;
+            font-size: 0.7rem;
+            padding: 6px 0;
         }
 
         /* ==================== TIMER DISPLAY ==================== */
@@ -383,45 +424,47 @@
             align-items: center;
             width: 100%;
             position: relative;
-            min-height: 100px;
-            padding: 4px 0;
-            margin: 4px 0;
+            min-height: 120px;
+            padding: 10px 0;
+            margin: 8px 0;
         }
 
         #rounds-info {
-            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
             font-weight: 500;
-            color: #888;
-            letter-spacing: 1px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
             z-index: 2;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
 
         #big-number {
             position: relative;
-            font-size: clamp(4rem, 20vw, 14rem);
+            font-size: clamp(4.5rem, 22vw, 13rem);
             font-weight: 700;
             font-variant-numeric: tabular-nums;
-            line-height: 1.2;
-            transition: color 0.15s ease;
-            color: #ffffff;
-            letter-spacing: 2px;
+            line-height: 1.1;
+            transition: color 0.2s ease, text-shadow 0.2s ease;
+            color: var(--text-main);
+            letter-spacing: 1px;
             z-index: 2;
             text-align: center;
             width: 100%;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
         }
 
         #phase-label {
-            font-size: clamp(1rem, 2.5vw, 1.8rem);
-            font-weight: 600;
-            letter-spacing: 4px;
+            font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            color: #888;
-            transition: color 0.15s ease;
+            color: var(--text-muted);
+            transition: color 0.2s ease, text-shadow 0.2s ease;
             text-align: center;
             padding: 0 10px;
             z-index: 2;
-            margin: 2px 0 2px 0;
+            margin: 4px 0;
         }
 
         #progress-ring-container {
@@ -429,8 +472,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: clamp(180px, 65vw, 680px);
-            height: clamp(180px, 65vw, 680px);
+            width: clamp(200px, 68vw, 650px);
+            height: clamp(200px, 68vw, 650px);
             pointer-events: none;
             z-index: 0;
         }
@@ -447,33 +490,38 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2px 0 2px 0;
+            padding: 4px 0;
             flex-shrink: 0;
-            min-height: 14px;
+            min-height: 20px;
         }
         #progress-dots {
             display: flex;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
-            max-width: 92%;
+            max-width: 90%;
         }
         .dot {
-            width: clamp(6px, 1.2vw, 12px);
-            height: clamp(6px, 1.2vw, 12px);
+            width: clamp(8px, 1.4vw, 12px);
+            height: clamp(8px, 1.4vw, 12px);
             border-radius: 50%;
-            background: #333;
-            transition: background 0.2s ease;
+            background: rgba(255, 255, 255, 0.12);
+            transition: all 0.3s ease;
             flex-shrink: 0;
         }
         .dot.done {
-            background: #34c759;
+            background: var(--work-green);
+            box-shadow: 0 0 8px rgba(56, 239, 125, 0.5);
         }
         .dot.current {
-            background: #ffcc00;
+            background: var(--warning-yellow);
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+            transform: scale(1.2);
         }
         .dot.extra-dot {
-            background: #5ac8fa;
+            background: var(--extra-blue);
+            box-shadow: 0 0 8px rgba(0, 180, 216, 0.6);
+            transform: scale(1.2);
         }
 
         /* ==================== CONTROLLI ==================== */
@@ -481,253 +529,126 @@
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 6px;
-            padding: 4px 0 6px 0;
+            gap: 10px;
+            padding: 8px 0 12px 0;
             flex-wrap: wrap;
             flex-shrink: 0;
         }
         .ctrl-btn {
-            height: 44px;
-            border: none;
-            border-radius: 60px;
-            font-size: clamp(0.7rem, 1.6vw, 1rem);
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
             font-weight: 700;
-            padding: 0 10px;
-            min-width: 45px;
+            padding: 0 18px;
+            min-width: 60px;
             flex: 1;
             cursor: pointer;
             touch-action: manipulation;
-            transition: 0.05s linear;
-            background: #2c2c2e;
-            color: white;
-            box-shadow: 0 4px 0 #000;
-            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            letter-spacing: 1.5px;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
             white-space: nowrap;
+            backdrop-filter: blur(8px);
         }
         .ctrl-btn:active {
             transform: scale(0.95);
         }
         #btn-start {
-            background: #34c759;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
             color: #000;
-            box-shadow: 0 4px 0 #1e7a34;
+            border: none;
+            box-shadow: 0 4px 20px var(--glow-cyan);
         }
         #btn-start.idle {
-            background: #34c759;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
             color: #000;
         }
         #btn-start.running {
-            background: #ffcc00;
+            background: linear-gradient(135deg, var(--warning-yellow), #f39c12);
             color: #000;
-            box-shadow: 0 4px 0 #b38f00;
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
         }
-        #btn-skip-back {
-            background: #5ac8fa;
-            color: #000;
-            box-shadow: 0 4px 0 #1a7a9a;
+        #btn-skip-back, #btn-skip-forward {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.3);
+            color: var(--primary-cyan);
             display: none;
-            flex: 0.5;
-            min-width: 45px;
-            font-size: 0.9rem;
+            flex: 0.6;
+            min-width: 50px;
         }
-        #btn-skip-forward {
-            background: #5ac8fa;
-            color: #000;
-            box-shadow: 0 4px 0 #1a7a9a;
-            display: none;
-            flex: 0.5;
-            min-width: 45px;
-            font-size: 0.9rem;
+        #btn-skip-back:hover, #btn-skip-forward:hover {
+            background: rgba(0, 240, 255, 0.2);
         }
         #btn-stop {
-            background: #ff3b30;
-            color: #fff;
-            box-shadow: 0 4px 0 #8a1e1a;
+            background: rgba(255, 77, 109, 0.15);
+            border-color: rgba(255, 77, 109, 0.4);
+            color: var(--rest-red);
             display: none;
-            flex: 0.4;
-            min-width: 40px;
-            font-size: 1rem;
+            flex: 0.5;
+            min-width: 45px;
         }
 
-        /* Nascondo vecchi pulsanti */
-        #btn-pause {
-            display: none !important;
-        }
-        #btn-skip {
-            display: none !important;
-        }
-        #btn-reset {
+        /* Hide Legacy Buttons */
+        #btn-pause, #btn-skip, #btn-reset {
             display: none !important;
         }
 
-        /* ==================== COLORI DINAMICI ==================== */
+        /* ==================== COLORI DINAMICI FASI ==================== */
         .phase-work #big-number,
         .phase-work #phase-label {
-            color: #34c759;
+            color: var(--work-green);
+            text-shadow: 0 0 25px rgba(56, 239, 125, 0.4);
         }
         .phase-rest #big-number,
         .phase-rest #phase-label {
-            color: #ff6b6b;
+            color: var(--rest-red);
+            text-shadow: 0 0 25px rgba(255, 77, 109, 0.4);
         }
         .phase-rest-warning #big-number,
         .phase-rest-warning #phase-label {
-            color: #ffcc00;
+            color: var(--warning-yellow);
+            text-shadow: 0 0 25px rgba(255, 193, 7, 0.5);
         }
         .phase-extra #big-number,
         .phase-extra #phase-label {
-            color: #5ac8fa;
+            color: var(--extra-blue);
+            text-shadow: 0 0 25px rgba(0, 180, 216, 0.5);
         }
         .phase-countdown #big-number,
         .phase-countdown #phase-label {
-            color: #ffcc00;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 25px var(--glow-cyan);
         }
         .phase-finished #big-number,
         .phase-finished #phase-label {
-            color: #34c759;
+            color: var(--work-green);
+            text-shadow: 0 0 30px rgba(56, 239, 125, 0.6);
         }
 
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 420px) {
-            #app {
-                padding: 6px 10px 2px 10px;
-            }
-            #logo-header {
-                top: 8px;
-                left: 10px;
-            }
-            #logo-header img {
-                height: 32px;
-            }
-            #logo-header .brand-name {
-                font-size: 0.9rem;
-            }
-            #drawer {
-                width: 280px;
-                padding: 16px 14px;
-            }
-            #drawer-header .logo-large img {
-                height: 32px;
-            }
-            #drawer-header .logo-large span {
-                font-size: 0.9rem;
-            }
-            #big-number {
-                font-size: clamp(3rem, 15vw, 6rem);
-            }
-            #progress-ring-container {
-                width: clamp(140px, 55vw, 250px);
-                height: clamp(140px, 55vw, 250px);
-            }
-            #phase-label {
-                font-size: 0.8rem;
-            }
-            #rounds-info {
-                font-size: 0.8rem;
-            }
-            .ctrl-btn {
-                height: 38px;
-                font-size: 0.6rem;
-                padding: 0 6px;
-                min-width: 30px;
-            }
-            #drawer .row {
-                padding: 4px 10px;
-            }
-            #drawer .row label {
-                font-size: 0.65rem;
-                min-width: 35px;
-            }
-            #drawer .row .controls button {
-                width: 22px;
-                height: 22px;
-                font-size: 0.8rem;
-            }
-            #drawer .row .controls span {
-                font-size: 0.8rem;
-                min-width: 22px;
-            }
-            .dot {
-                width: 5px;
-                height: 5px;
-            }
-            #drawer .preset-btn {
-                font-size: 0.5rem;
-                padding: 3px 0;
-                min-width: 30px;
-            }
-            #drawer #new-preset-area input {
-                font-size: 0.5rem;
-                padding: 2px 6px;
-            }
-            #timer-display {
-                min-height: 80px;
-                padding: 2px 0;
-            }
-            #progress-dots-container {
-                min-height: 10px;
-                padding: 0;
-            }
-            #controls {
-                padding: 2px 0 4px 0;
-            }
-        }
-
-        @media (min-width: 600px) and (max-width: 1024px) {
-            #progress-ring-container {
-                width: clamp(280px, 55vw, 500px);
-                height: clamp(280px, 55vw, 500px);
-            }
-            #big-number {
-                font-size: clamp(6rem, 15vw, 10rem);
-            }
-        }
-
-        @media (min-width: 1200px) {
-            #progress-ring-container {
-                width: 680px;
-                height: 680px;
-            }
-            #big-number {
-                font-size: 14rem;
-            }
-            #phase-label {
-                font-size: 2rem;
-            }
-            #rounds-info {
-                font-size: 1.5rem;
-            }
-            .ctrl-btn {
-                font-size: 1.2rem;
-                height: 50px;
-            }
-            .dot {
-                width: 14px;
-                height: 14px;
-            }
-            #drawer {
-                width: 380px;
-            }
-            #logo-header img {
-                height: 50px;
-            }
-            #logo-header .brand-name {
-                font-size: 1.4rem;
-            }
-            #drawer-header .logo-large img {
-                height: 50px;
-            }
-            #drawer-header .logo-large span {
-                font-size: 1.4rem;
-            }
+            #app { padding: 6px 10px; }
+            #logo-header { top: 8px; left: 10px; padding: 4px 10px; }
+            #logo-header img { height: 28px; }
+            #logo-header .brand-name { font-size: 0.85rem; }
+            #drawer { width: 300px; padding: 18px 14px; }
+            #big-number { font-size: clamp(3.5rem, 18vw, 6.5rem); }
+            #progress-ring-container { width: clamp(160px, 60vw, 280px); height: clamp(160px, 60vw, 280px); }
+            .ctrl-btn { height: 42px; font-size: 0.75rem; padding: 0 10px; }
         }
     </style>
 </head>
 <body>
+    <!-- FLASH OVERLAY (AGGIUNTO PER EFFETTO NOTIFICA VISIVA) -->
+    <div id="flash-overlay" class="flash-overlay"></div>
+
     <!-- ==================== LOGO HEADER ==================== -->
     <button id="logo-header" aria-label="Apri menu KrioPlanet">
         <img src="Logo-Blu.svg" alt="KrioPlanet" id="logo-img">
@@ -822,12 +743,12 @@
             <div id="big-number">30</div>
             <div id="phase-label">PRONTO</div>
             <svg id="progress-ring-container" viewBox="0 0 100 100">
-                <circle id="ring-outer-bg" cx="50" cy="50" r="46" fill="none" stroke="#2a2a2a" stroke-width="6" />
-                <circle id="ring-outer" cx="50" cy="50" r="46" fill="none" stroke="#ff6a00" stroke-width="6"
+                <circle id="ring-outer-bg" cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5" />
+                <circle id="ring-outer" cx="50" cy="50" r="46" fill="none" stroke="#00f0ff" stroke-width="5"
                     stroke-linecap="round" stroke-dasharray="289.03" stroke-dashoffset="289.03"
-                    transform="rotate(-90 50 50)" />
-                <circle id="ring-inner-bg" cx="50" cy="50" r="39" fill="none" stroke="#222222" stroke-width="5" />
-                <circle id="ring-inner" cx="50" cy="50" r="39" fill="none" stroke="#34c759" stroke-width="5"
+                    transform="rotate(-90 50 50)" style="filter: drop-shadow(0px 0px 6px var(--primary-cyan));" />
+                <circle id="ring-inner-bg" cx="50" cy="50" r="39" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="5" />
+                <circle id="ring-inner" cx="50" cy="50" r="39" fill="none" stroke="#38ef7d" stroke-width="5"
                     stroke-linecap="round" stroke-dasharray="245.04" stroke-dashoffset="245.04"
                     transform="rotate(-90 50 50)" />
             </svg>
@@ -853,6 +774,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
+
+            // Funzione extra non distruttiva per il flash visivo
+            function triggerFlash() {
+                var overlay = document.getElementById('flash-overlay');
+                if (!overlay) return;
+                overlay.classList.add('flash-active');
+                setTimeout(function() {
+                    overlay.classList.remove('flash-active');
+                }, 120);
+            }
 
             // ==============================
             // 1. DRAWER
@@ -1062,8 +993,7 @@
                 }, 1000);
             }
 
-            function stopTick() { if (tickInterval) { clearInterval(tickInterval);
-                    tickInterval = null; } }
+            function stopTick() { if (tickInterval) { clearInterval(tickInterval); tickInterval = null; } }
 
             // ==============================
             // 8. CUSTOM PRESETS
@@ -1147,8 +1077,7 @@
                 resetUI();
                 updateUI();
                 presetBtns.forEach(function(b) { b.classList.remove('active'); });
-                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove(
-                        'active'); });
+                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove('active'); });
                 var wrappers = document.querySelectorAll('.custom-preset-wrapper');
                 if (wrappers[idx]) {
                     var btn = wrappers[idx].querySelector('.preset-btn');
@@ -1157,8 +1086,7 @@
             }
 
             btnAddCustom.addEventListener('click', function() { addCustomPreset(newPresetName.value); });
-            newPresetName.addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomPreset(newPresetName
-                    .value); });
+            newPresetName.addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomPreset(newPresetName.value); });
 
             // ==============================
             // 9. UI UPDATE
@@ -1192,21 +1120,32 @@
                 var offsetInner = CIRC_INNER - (progressInner / 100) * CIRC_INNER;
                 ringInner.style.strokeDashoffset = offsetInner;
 
-                var color = '#444';
+                var color = 'rgba(255,255,255,0.2)';
                 var phaseClass = '';
                 var isRestWarning = (timerState.status === 'rest' && timerState.currentTime <= 3 && timerState.currentTime > 0);
-                if (timerState.status === 'work') { color = '#34c759';
-                    phaseClass = 'phase-work'; } else if (timerState.status === 'rest') {
-                    if (isRestWarning) { color = '#ffcc00';
-                        phaseClass = 'phase-rest-warning'; } else { color = '#ff6b6b';
-                        phaseClass = 'phase-rest'; }
-                } else if (timerState.status === 'extra') { color = '#5ac8fa';
-                    phaseClass = 'phase-extra'; } else if (timerState.status === 'countdown') { color = '#ffcc00';
-                    phaseClass = 'phase-countdown'; } else if (timerState.status === 'finished') { color = '#34c759';
-                    phaseClass = 'phase-finished'; }
+                if (timerState.status === 'work') { 
+                    color = 'var(--work-green)';
+                    phaseClass = 'phase-work'; 
+                } else if (timerState.status === 'rest') {
+                    if (isRestWarning) { 
+                        color = 'var(--warning-yellow)';
+                        phaseClass = 'phase-rest-warning'; 
+                    } else { 
+                        color = 'var(--rest-red)';
+                        phaseClass = 'phase-rest'; 
+                    }
+                } else if (timerState.status === 'extra') { 
+                    color = 'var(--extra-blue)';
+                    phaseClass = 'phase-extra'; 
+                } else if (timerState.status === 'countdown') { 
+                    color = 'var(--primary-cyan)';
+                    phaseClass = 'phase-countdown'; 
+                } else if (timerState.status === 'finished') { 
+                    color = 'var(--work-green)';
+                    phaseClass = 'phase-finished'; 
+                }
                 ringInner.style.stroke = color;
-                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown',
-                    'phase-finished');
+                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
                 if (phaseClass) appDiv.classList.add(phaseClass);
 
                 if (totalDuration > 0) {
@@ -1223,12 +1162,11 @@
                 bigNumber.textContent = settings.work;
                 roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
                 phaseLabel.textContent = 'PRONTO';
-                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown',
-                    'phase-finished');
+                appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra', 'phase-countdown', 'phase-finished');
                 ringInner.style.strokeDashoffset = CIRC_INNER;
-                ringInner.style.stroke = '#444';
+                ringInner.style.stroke = 'rgba(255,255,255,0.2)';
                 ringOuter.style.strokeDashoffset = CIRC_OUTER;
-                btnStart.style.display = 'block';
+                btnStart.style.display = 'flex';
                 btnStart.textContent = 'PARTI';
                 btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
@@ -1354,6 +1292,7 @@
             // ==============================
             function startCountdown() {
                 stopTimer();
+                triggerFlash();
                 timerState.status = 'countdown';
                 timerState.currentTime = 3;
                 timerState.maxTime = 3;
@@ -1369,6 +1308,7 @@
 
             function startWorkPhase() {
                 stopTimer();
+                triggerFlash();
                 timerState.status = 'work';
                 timerState.currentRound += 1;
                 timerState.currentTime = settings.work;
@@ -1376,11 +1316,11 @@
                 timerState.isPaused = false;
                 timerState.extraTriggeredThisRound = false;
                 phaseLabel.textContent = 'LAVORO';
-                btnSkipBack.style.display = 'block';
+                btnSkipBack.style.display = 'flex';
                 btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'block';
+                btnSkipForward.style.display = 'flex';
                 btnSkipForward.textContent = '▶ AVV.';
-                btnStop.style.display = 'block';
+                btnStop.style.display = 'flex';
                 updateUI();
                 vibrate([200]);
                 startWorkInterval();
@@ -1388,16 +1328,17 @@
 
             function startRestPhase() {
                 stopTimer();
+                triggerFlash();
                 timerState.status = 'rest';
                 timerState.currentTime = settings.rest;
                 timerState.maxTime = settings.rest;
                 timerState.isPaused = false;
                 phaseLabel.textContent = 'RECUPERO';
-                btnSkipBack.style.display = 'block';
+                btnSkipBack.style.display = 'flex';
                 btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'block';
+                btnSkipForward.style.display = 'flex';
                 btnSkipForward.textContent = '▶ AVV.';
-                btnStop.style.display = 'block';
+                btnStop.style.display = 'flex';
                 updateUI();
                 vibrate([100]);
                 stopTick();
@@ -1406,16 +1347,17 @@
 
             function startExtraPhase() {
                 stopTimer();
+                triggerFlash();
                 timerState.status = 'extra';
                 timerState.currentTime = settings.extraDur;
                 timerState.maxTime = settings.extraDur;
                 timerState.isPaused = false;
                 phaseLabel.textContent = 'EXTRA ATTIVO';
-                btnSkipBack.style.display = 'block';
+                btnSkipBack.style.display = 'flex';
                 btnSkipBack.textContent = '◀ IND.';
-                btnSkipForward.style.display = 'block';
+                btnSkipForward.style.display = 'flex';
                 btnSkipForward.textContent = '▶ AVV.';
-                btnStop.style.display = 'block';
+                btnStop.style.display = 'flex';
                 updateUI();
                 playExtraAlert();
                 vibrate([100, 50, 100]);
@@ -1425,17 +1367,18 @@
 
             function finishWorkout() {
                 stopTimer();
+                triggerFlash();
                 timerState.status = 'finished';
                 timerState.currentTime = 0;
                 phaseLabel.textContent = 'COMPLETATO';
                 bigNumber.textContent = '0';
                 roundsInfo.textContent = 'Giro ' + timerState.currentRound + ' / ' + timerState.totalRounds;
                 ringInner.style.strokeDashoffset = 0;
-                ringInner.style.stroke = '#34c759';
+                ringInner.style.stroke = 'var(--work-green)';
                 ringOuter.style.strokeDashoffset = 0;
                 if (totalDuration > 0) totalElapsed = totalDuration;
                 appDiv.classList.add('phase-finished');
-                btnStart.style.display = 'block';
+                btnStart.style.display = 'flex';
                 btnStart.textContent = 'RIAVVIA';
                 btnStart.className = 'ctrl-btn idle';
                 btnPause.style.display = 'none';
@@ -1469,7 +1412,7 @@
                         phaseLabel.textContent = 'RECUPERO';
                         btnSkipBack.textContent = '◀ IND.';
                         btnSkipForward.textContent = '▶ AVV.';
-                        btnStop.style.display = 'block';
+                        btnStop.style.display = 'flex';
                         updateUI();
                         vibrate([100]);
                         stopTick();
@@ -1484,7 +1427,7 @@
                     phaseLabel.textContent = 'LAVORO';
                     btnSkipBack.textContent = '◀ IND.';
                     btnSkipForward.textContent = '▶ AVV.';
-                    btnStop.style.display = 'block';
+                    btnStop.style.display = 'flex';
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
@@ -1497,7 +1440,7 @@
                     phaseLabel.textContent = 'LAVORO';
                     btnSkipBack.textContent = '◀ IND.';
                     btnSkipForward.textContent = '▶ AVV.';
-                    btnStop.style.display = 'block';
+                    btnStop.style.display = 'flex';
                     updateUI();
                     vibrate([200]);
                     startWorkInterval();
@@ -1619,7 +1562,7 @@
                     bigNumber.textContent = settings.work;
                     roundsInfo.textContent = 'Giro 0 / ' + settings.rounds;
                     ringInner.style.strokeDashoffset = CIRC_INNER;
-                    ringInner.style.stroke = '#444';
+                    ringInner.style.stroke = 'rgba(255,255,255,0.2)';
                     ringOuter.style.strokeDashoffset = CIRC_OUTER;
                     phaseLabel.textContent = 'PRONTO';
                     appDiv.classList.remove('phase-work', 'phase-rest', 'phase-rest-warning', 'phase-extra',
@@ -1651,8 +1594,7 @@
                 presetBtns.forEach(function(b) { b.classList.remove('active'); });
                 var target = document.querySelector('#drawer .preset-btn[data-preset="' + name + '"]');
                 if (target) target.classList.add('active');
-                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove(
-                        'active'); });
+                document.querySelectorAll('.custom-preset-wrapper .preset-btn').forEach(function(b) { b.classList.remove('active'); });
             }
 
             // ==============================
@@ -1707,14 +1649,10 @@
             document.getElementById('inc-rest').addEventListener('click', function() { adjustValue(valRest, 1, 1, 300); });
             document.getElementById('dec-rounds').addEventListener('click', function() { adjustValue(valRounds, -1, 1, 99); });
             document.getElementById('inc-rounds').addEventListener('click', function() { adjustValue(valRounds, 1, 1, 99); });
-            document.getElementById('dec-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, -1, 0,
-                    99); });
-            document.getElementById('inc-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, 1, 0,
-                    99); });
-            document.getElementById('dec-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, -1, 5,
-                    600); });
-            document.getElementById('inc-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, 1, 5,
-                    600); });
+            document.getElementById('dec-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, -1, 0, 99); });
+            document.getElementById('inc-extra-every').addEventListener('click', function() { adjustValue(valExtraEvery, 1, 0, 99); });
+            document.getElementById('dec-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, -1, 5, 600); });
+            document.getElementById('inc-extra-dur').addEventListener('click', function() { adjustValue(valExtraDur, 1, 5, 600); });
 
             presetBtns.forEach(function(btn) {
                 btn.addEventListener('click', function() {
@@ -1749,7 +1687,7 @@
             loadTickState();
             loadCustomPresets();
             loadPreset('hiit');
-            console.log('✅ KrioPlanet Timer - icone rimosse e font uniformato');
+            console.log('✅ KrioPlanet Timer - UI modernizzata e preservate tutte le funzionalità originali');
         });
     </script>
 </body>
