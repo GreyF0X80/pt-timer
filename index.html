@@ -21,7 +21,12 @@
     </script>
 
     <title>KrioPlanet Timer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="application-name" content="KrioPlanet Timer">
+    <meta name="apple-mobile-web-app-title" content="KrioPlanet">
+    <meta name="description" content="Timer offline per allenamenti HIIT, Tabata, forza e cardio.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
     <style>
         /* ==================== PALETTE KRIOPLANET & RESET ==================== */
         :root {
@@ -71,7 +76,7 @@
             background-repeat: no-repeat;
             background-size: cover;
             color: var(--text-main);
-            font-family: 'Poppins', -apple-system, 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
             overscroll-behavior: none;
         }
@@ -1068,6 +1073,10 @@
                 currentTime: settings.work,
                 maxTime: settings.work,
                 timerInterval: null,
+                tickHandler: null,
+                phaseEndAt: 0,
+                phaseRunDuration: 0,
+                phaseElapsedAtStart: 0,
                 isPaused: false,
                 extraTriggeredThisRound: false
             };
@@ -1112,15 +1121,26 @@
             function playTickMetronome() { playBeep(1200, 30); }
 
             function calculateTotalDuration() {
-                var work = settings.work, rest = settings.rest, rounds = settings.rounds;
-                var extraEvery = settings.extraEvery, extraDur = settings.extraDur;
-                if (rounds === 0) return 0;
-                var total = (work + rest) * rounds;
+                var work = settings.work;
+                var rest = settings.rest;
+                var rounds = settings.rounds;
+                var extraEvery = settings.extraEvery;
+                var extraDur = settings.extraDur;
+
+                if (rounds <= 0) return 0;
+
+                // 3 secondi di partenza + tutti i lavori.
+                var total = 3 + (work * rounds);
+
+                // Il recupero non viene eseguito dopo l'ultimo giro.
+                total += rest * Math.max(0, rounds - 1);
+
+                // Anche l'extra non viene eseguito dopo l'ultimo giro.
                 if (extraEvery > 0) {
-                    var numExtras = Math.floor(rounds / extraEvery);
+                    var numExtras = Math.floor((rounds - 1) / extraEvery);
                     total += extraDur * numExtras;
                 }
-                total += 3;
+
                 return total;
             }
 
@@ -1359,101 +1379,174 @@
                 timerState.totalRounds = settings.rounds;
                 totalElapsed = 0;
                 lastCountdownSecond = -1;
+                timerState.phaseEndAt = 0;
+                timerState.phaseRunDuration = 0;
+                timerState.phaseElapsedAtStart = 0;
+                timerState.tickHandler = null;
                 updateDots();
                 stopTick();
             }
 
-            // TIMER ENGINE
-            function stopTimer() {
+            // TIMER ENGINE AD ALTA PRECISIONE
+            // Il tempo non viene più sottratto a blocchi da 0,1 s: ogni fase usa
+            // una scadenza assoluta. In questo modo ritardi e throttling del browser
+            // non si accumulano durante l'allenamento.
+            function syncAccurateClock() {
+                if (!timerState.phaseEndAt || timerState.isPaused) return;
+
+                var remaining = Math.max(0, (timerState.phaseEndAt - Date.now()) / 1000);
+                timerState.currentTime = remaining;
+
+                var elapsedInRun = Math.max(0, timerState.phaseRunDuration - remaining);
+                totalElapsed = Math.min(
+                    totalDuration,
+                    timerState.phaseElapsedAtStart + elapsedInRun
+                );
+            }
+
+            function stopTimer(syncClock) {
+                if (syncClock !== false) syncAccurateClock();
+
                 if (timerState.timerInterval) {
                     clearInterval(timerState.timerInterval);
                     timerState.timerInterval = null;
                 }
+
+                timerState.tickHandler = null;
+                timerState.phaseEndAt = 0;
                 stopTick();
             }
 
-            function startCountdownInterval() {
-                stopTimer(); lastCountdownSecond = -1;
-                timerState.timerInterval = setInterval(function() {
-                    if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
+            function shouldSignalTransition(overshootMs) {
+                return document.visibilityState === 'visible' && overshootMs < 1500;
+            }
+
+            function runAccuratePhase(onComplete, carryMs) {
+                stopTimer(false);
+                lastCountdownSecond = -1;
+
+                carryMs = Math.max(0, Number(carryMs) || 0);
+
+                // Se il callback è arrivato in ritardo, recupera il ritardo nella
+                // fase successiva anziché aggiungerlo alla durata del workout.
+                var phaseRemainingMs = Math.max(0, timerState.currentTime * 1000);
+                var consumedCarryMs = Math.min(carryMs, phaseRemainingMs);
+                if (consumedCarryMs > 0) {
+                    timerState.currentTime = Math.max(0, (phaseRemainingMs - consumedCarryMs) / 1000);
+                    totalElapsed = Math.min(totalDuration, totalElapsed + consumedCarryMs / 1000);
+                    carryMs -= consumedCarryMs;
+                }
+
+                if (timerState.currentTime <= 0) {
+                    timerState.currentTime = 0;
+                    updateUI();
+                    onComplete(carryMs);
+                    return;
+                }
+
+                timerState.phaseRunDuration = timerState.currentTime;
+                timerState.phaseElapsedAtStart = totalElapsed;
+                timerState.phaseEndAt = Date.now() + timerState.currentTime * 1000;
+
+                var tick = function() {
+                    if (timerState.isPaused || !timerState.phaseEndAt) return;
+
+                    var remainingMs = timerState.phaseEndAt - Date.now();
+                    var remainingSeconds = Math.max(0, remainingMs / 1000);
+                    timerState.currentTime = remainingSeconds;
+
+                    var elapsedInRun = Math.max(0, timerState.phaseRunDuration - remainingSeconds);
+                    totalElapsed = Math.min(
+                        totalDuration,
+                        timerState.phaseElapsedAtStart + elapsedInRun
+                    );
+
                     handleCountdownTick();
-                    if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0; updateUI();
+                    updateUI();
+
+                    if (remainingMs <= 0) {
+                        if (timerState.timerInterval) clearInterval(timerState.timerInterval);
+                        timerState.timerInterval = null;
+                        timerState.tickHandler = null;
+                        timerState.phaseEndAt = 0;
+                        timerState.currentTime = 0;
+                        totalElapsed = Math.min(
+                            totalDuration,
+                            timerState.phaseElapsedAtStart + timerState.phaseRunDuration
+                        );
+                        updateUI();
+                        onComplete(Math.max(0, -remainingMs));
+                    }
+                };
+
+                timerState.tickHandler = tick;
+                timerState.timerInterval = setInterval(tick, 100);
+                tick();
+            }
+
+            function startCountdownInterval(carryMs) {
+                runAccuratePhase(function(overshootMs) {
+                    if (shouldSignalTransition(overshootMs)) {
                         setTimeout(function() { playBeep(1200, 80); }, 100);
-                        startWorkPhase(); return;
                     }
-                    updateUI();
-                }, 100);
+                    startWorkPhase(overshootMs);
+                }, carryMs);
             }
 
-            function startWorkInterval() {
-                stopTimer(); lastCountdownSecond = -1;
-                timerState.timerInterval = setInterval(function() {
-                    if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
-                    handleCountdownTick();
-                    if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0; updateUI();
-                        playGong(); triggerVibration([300, 100, 300]);
-                        if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
-                        else startRestPhase();
-                        return;
+            function startWorkInterval(carryMs) {
+                runAccuratePhase(function(overshootMs) {
+                    if (shouldSignalTransition(overshootMs)) {
+                        playGong();
+                        triggerVibration([300, 100, 300]);
                     }
-                    updateUI();
-                }, 100);
-                if (tickEnabled) startTick();
+                    if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
+                    else startRestPhase(overshootMs);
+                }, carryMs);
+                if (tickEnabled && timerState.currentTime > 0) startTick();
             }
 
-            function startRestInterval() {
-                stopTimer(); lastCountdownSecond = -1;
-                timerState.timerInterval = setInterval(function() {
-                    if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
-                    handleCountdownTick();
-                    if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0; updateUI();
-                        playBeep(1200, 80); triggerVibration([200, 100, 200]);
-                        var shouldTriggerExtra = (settings.extraEvery > 0) &&
-                            (timerState.currentRound % settings.extraEvery === 0) &&
-                            !timerState.extraTriggeredThisRound &&
-                            (timerState.currentRound < timerState.totalRounds);
-                        if (shouldTriggerExtra) {
-                            timerState.extraTriggeredThisRound = true;
-                            startExtraPhase();
-                        } else startWorkPhase();
-                        return;
+            function startRestInterval(carryMs) {
+                runAccuratePhase(function(overshootMs) {
+                    if (shouldSignalTransition(overshootMs)) {
+                        playBeep(1200, 80);
+                        triggerVibration([200, 100, 200]);
                     }
-                    updateUI();
-                }, 100);
+                    var shouldTriggerExtra = (settings.extraEvery > 0) &&
+                        (timerState.currentRound % settings.extraEvery === 0) &&
+                        !timerState.extraTriggeredThisRound &&
+                        (timerState.currentRound < timerState.totalRounds);
+                    if (shouldTriggerExtra) {
+                        timerState.extraTriggeredThisRound = true;
+                        startExtraPhase(overshootMs);
+                    } else startWorkPhase(overshootMs);
+                }, carryMs);
             }
 
-            function startExtraInterval() {
-                stopTimer(); lastCountdownSecond = -1;
-                timerState.timerInterval = setInterval(function() {
-                    if (timerState.isPaused) return;
-                    timerState.currentTime -= 0.1; totalElapsed += 0.1;
-                    handleCountdownTick();
-                    if (timerState.currentTime <= 0) {
-                        timerState.currentTime = 0; updateUI();
-                        playBeep(1000, 400); triggerVibration([300]);
-                        startWorkPhase(); return;
+            function startExtraInterval(carryMs) {
+                runAccuratePhase(function(overshootMs) {
+                    if (shouldSignalTransition(overshootMs)) {
+                        playBeep(1000, 400);
+                        triggerVibration([300]);
                     }
-                    updateUI();
-                }, 100);
+                    startWorkPhase(overshootMs);
+                }, carryMs);
             }
 
             // FASI
-            function startCountdown() {
-                stopTimer(); triggerVibration([100, 100, 100]);
+            function startCountdown(carryMs) {
+                stopTimer(false);
+                carryMs = Math.max(0, Number(carryMs) || 0);
+                if (shouldSignalTransition(carryMs)) triggerVibration([100, 100, 100]);
                 timerState.status = 'countdown'; timerState.currentTime = 3; timerState.maxTime = 3;
                 timerState.isPaused = false; phaseLabel.textContent = 'PARTENZA';
                 btnSkipBack.style.display = 'none'; btnSkipForward.style.display = 'none'; btnStop.style.display = 'none';
-                updateUI(); startCountdownInterval();
+                updateUI(); startCountdownInterval(carryMs);
             }
 
-            function startWorkPhase() {
-                stopTimer(); triggerVibration([200]);
+            function startWorkPhase(carryMs) {
+                stopTimer(false);
+                carryMs = Math.max(0, Number(carryMs) || 0);
+                if (shouldSignalTransition(carryMs)) triggerVibration([200]);
                 timerState.status = 'work'; timerState.currentRound += 1;
                 timerState.currentTime = settings.work; timerState.maxTime = settings.work;
                 timerState.isPaused = false; timerState.extraTriggeredThisRound = false;
@@ -1461,31 +1554,39 @@
                 btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI(); startWorkInterval();
+                updateUI(); startWorkInterval(carryMs);
             }
 
-            function startRestPhase() {
-                stopTimer(); triggerVibration([100]);
+            function startRestPhase(carryMs) {
+                stopTimer(false);
+                carryMs = Math.max(0, Number(carryMs) || 0);
+                if (shouldSignalTransition(carryMs)) triggerVibration([100]);
                 timerState.status = 'rest'; timerState.currentTime = settings.rest; timerState.maxTime = settings.rest;
                 timerState.isPaused = false; phaseLabel.textContent = 'RECUPERO';
                 btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI(); stopTick(); startRestInterval();
+                updateUI(); stopTick(); startRestInterval(carryMs);
             }
 
-            function startExtraPhase() {
-                stopTimer(); triggerVibration([100, 50, 100]);
+            function startExtraPhase(carryMs) {
+                stopTimer(false);
+                carryMs = Math.max(0, Number(carryMs) || 0);
+                if (shouldSignalTransition(carryMs)) triggerVibration([100, 50, 100]);
                 timerState.status = 'extra'; timerState.currentTime = settings.extraDur; timerState.maxTime = settings.extraDur;
                 timerState.isPaused = false; phaseLabel.textContent = 'EXTRA ATTIVO';
                 btnSkipBack.style.display = 'flex'; btnSkipBack.textContent = '◀ IND.';
                 btnSkipForward.style.display = 'flex'; btnSkipForward.textContent = '▶ AVV.';
                 btnStop.style.display = 'flex';
-                updateUI(); playExtraAlert(); stopTick(); startExtraInterval();
+                updateUI();
+                if (shouldSignalTransition(carryMs)) playExtraAlert();
+                stopTick(); startExtraInterval(carryMs);
             }
 
             function finishWorkout() {
-                stopTimer(); triggerVibration([100, 50, 100, 50, 300]);
+                stopTimer(false);
+                releaseWakeLock();
+                triggerVibration([100, 50, 100, 50, 300]);
                 timerState.status = 'finished'; timerState.currentTime = 0;
                 phaseLabel.textContent = 'COMPLETATO'; bigNumber.textContent = '0';
                 roundsInfo.textContent = 'Giro ' + timerState.currentRound + ' / ' + timerState.totalRounds;
@@ -1504,26 +1605,47 @@
             // CONTROLLI
             function skipBack() {
                 if (timerState.status === 'idle' || timerState.status === 'finished' || timerState.isPaused) return;
+
+                syncAccurateClock();
                 var s = timerState.status;
+                var elapsedCurrentPhase = Math.max(0, timerState.maxTime - timerState.currentTime);
+                stopTimer(false);
+
                 if (s === 'work') {
                     if (timerState.currentRound > 1) {
-                        timerState.currentRound -= 1; timerState.status = 'rest';
+                        var previousRound = timerState.currentRound - 1;
+                        var hadExtra = settings.extraEvery > 0 &&
+                            previousRound % settings.extraEvery === 0 &&
+                            previousRound < timerState.totalRounds;
+                        var rollback = elapsedCurrentPhase + settings.rest + (hadExtra ? settings.extraDur : 0);
+                        totalElapsed = Math.max(0, totalElapsed - rollback);
+
+                        timerState.currentRound = previousRound;
+                        timerState.status = 'rest';
                         timerState.currentTime = settings.rest; timerState.maxTime = settings.rest;
                         timerState.extraTriggeredThisRound = false;
                         phaseLabel.textContent = 'RECUPERO';
                         updateUI(); triggerVibration([100]); stopTick(); startRestInterval();
                     }
                 } else if (s === 'rest' || s === 'extra') {
+                    var rollbackToWork = elapsedCurrentPhase + settings.work;
+                    if (s === 'extra') rollbackToWork += settings.rest;
+                    totalElapsed = Math.max(0, totalElapsed - rollbackToWork);
+
                     timerState.status = 'work'; timerState.currentTime = settings.work; timerState.maxTime = settings.work;
+                    timerState.extraTriggeredThisRound = false;
                     phaseLabel.textContent = 'LAVORO'; updateUI(); triggerVibration([200]); startWorkInterval();
                 }
             }
 
             function skipForward() {
                 if (timerState.status === 'idle' || timerState.status === 'finished' || timerState.isPaused) return;
+
+                syncAccurateClock();
                 var remaining = timerState.currentTime;
-                if (remaining > 0) totalElapsed += remaining;
-                stopTimer(); stopTick();
+                if (remaining > 0) totalElapsed = Math.min(totalDuration, totalElapsed + remaining);
+                stopTimer(false);
+
                 var s = timerState.status;
                 if (s === 'countdown') {
                     playBeep(1200, 80);
@@ -1532,16 +1654,18 @@
                 } else if (s === 'work') {
                     playGong(); triggerVibration([200]);
                     if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
-                    else {
-                        var shouldTriggerExtra = (settings.extraEvery > 0) &&
-                            (timerState.currentRound % settings.extraEvery === 0) &&
-                            !timerState.extraTriggeredThisRound &&
-                            (timerState.currentRound < timerState.totalRounds);
-                        if (shouldTriggerExtra) { timerState.extraTriggeredThisRound = true; startExtraPhase(); }
-                        else startRestPhase();
-                    }
+                    else startRestPhase();
                 } else if (s === 'rest') {
-                    playBeep(1200, 80); triggerVibration([100]); startWorkPhase();
+                    playBeep(1200, 80);
+                    triggerVibration([100]);
+                    var shouldTriggerExtra = (settings.extraEvery > 0) &&
+                        (timerState.currentRound % settings.extraEvery === 0) &&
+                        !timerState.extraTriggeredThisRound &&
+                        (timerState.currentRound < timerState.totalRounds);
+                    if (shouldTriggerExtra) {
+                        timerState.extraTriggeredThisRound = true;
+                        startExtraPhase();
+                    } else startWorkPhase();
                 } else if (s === 'extra') {
                     playBeep(1000, 200); triggerVibration([100]); startWorkPhase();
                 }
@@ -1549,7 +1673,7 @@
             }
 
             function stopAll() {
-                stopTimer(); stopTick();
+                stopTimer(); stopTick(); releaseWakeLock();
                 timerState.status = 'idle'; timerState.currentRound = 0; timerState.isPaused = false;
                 timerState.extraTriggeredThisRound = false; timerState.currentTime = settings.work;
                 timerState.maxTime = settings.work; timerState.totalRounds = settings.rounds;
@@ -1559,16 +1683,22 @@
 
             function togglePause() {
                 if (timerState.status === 'idle' || timerState.status === 'finished') return;
+
                 if (timerState.isPaused) {
-                    timerState.isPaused = false; btnStart.textContent = 'PAUSA'; btnStart.className = 'ctrl-btn running';
+                    timerState.isPaused = false;
+                    btnStart.textContent = 'PAUSA'; btnStart.className = 'ctrl-btn running';
+                    requestWakeLock();
+
                     var s = timerState.status;
                     if (s === 'work') startWorkInterval();
                     else if (s === 'rest') startRestInterval();
                     else if (s === 'extra') startExtraInterval();
                     else if (s === 'countdown') startCountdownInterval();
                 } else {
-                    timerState.isPaused = true; btnStart.textContent = 'RIPRENDI'; btnStart.className = 'ctrl-btn idle';
-                    stopTimer(); stopTick(); updateUI();
+                    syncAccurateClock();
+                    timerState.isPaused = true;
+                    btnStart.textContent = 'RIPRENDI'; btnStart.className = 'ctrl-btn idle';
+                    stopTimer(false); stopTick(); releaseWakeLock(); updateUI();
                 }
             }
 
@@ -1620,6 +1750,7 @@
                     timerState.currentTime = settings.work; timerState.maxTime = settings.work;
                     btnStart.textContent = 'PAUSA'; btnStart.className = 'ctrl-btn running';
                     btnSkipBack.style.display = 'none'; btnSkipForward.style.display = 'none'; btnStop.style.display = 'none';
+                    requestWakeLock();
                     startCountdown();
                 } else togglePause();
             }
@@ -1659,15 +1790,48 @@
             btnSkipForward.addEventListener('click', skipForward);
             btnStop.addEventListener('click', stopAll);
 
-            // WAKE LOCK
-            if ('wakeLock' in navigator) {
-                var wl = null;
-                var reqLock = function() {
-                    try { navigator.wakeLock.request('screen').then(function(lock) { wl = lock; }).catch(function() {}); } catch (e) {}
-                };
-                reqLock();
-                document.addEventListener('visibilitychange', function() {
-                    if (document.visibilityState === 'visible' && wl === null) reqLock();
+            // WAKE LOCK: attivo solo mentre il timer sta realmente lavorando.
+            var wakeLockSentinel = null;
+
+            async function requestWakeLock() {
+                if (!('wakeLock' in navigator)) return;
+                if (!isRunning() || timerState.isPaused || document.visibilityState !== 'visible') return;
+                if (wakeLockSentinel) return;
+
+                try {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', function() {
+                        wakeLockSentinel = null;
+                    });
+                } catch (e) {
+                    wakeLockSentinel = null;
+                }
+            }
+
+            async function releaseWakeLock() {
+                if (!wakeLockSentinel) return;
+                var lock = wakeLockSentinel;
+                wakeLockSentinel = null;
+                try { await lock.release(); } catch (e) {}
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    // Forza un aggiornamento immediato dopo un eventuale throttling.
+                    if (typeof timerState.tickHandler === 'function') timerState.tickHandler();
+                    if (isRunning() && !timerState.isPaused) requestWakeLock();
+                } else {
+                    releaseWakeLock();
+                }
+            });
+
+            window.addEventListener('pagehide', releaseWakeLock);
+
+            // PWA / OFFLINE: registrazione del Service Worker su HTTPS o localhost.
+            if ('serviceWorker' in navigator &&
+                (location.protocol === 'https:' || location.hostname === 'localhost')) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('./service-worker.js').catch(function() {});
                 });
             }
 
