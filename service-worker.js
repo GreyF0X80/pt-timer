@@ -1,10 +1,13 @@
-const CACHE_NAME = 'krioplanet-timer-v2-2026-07-28';
+const CACHE_NAME = 'krioplanet-timer-v3-icon-2026-07-28';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './icons/favicon-32.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './Logo-Blu.svg'
 ];

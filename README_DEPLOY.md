@@ -27,3 +27,16 @@ Dopo il primo caricamento online, HTML, manifest, icone e logo vengono memorizza
 ## Nota Service Worker
 
 Il Service Worker funziona su HTTPS o su localhost. GitHub Pages usa HTTPS, quindi non serve alcuna configurazione aggiuntiva.
+
+## Icona KrioPlanet Timer
+
+Questa versione include la nuova icona in tutti i formati necessari:
+
+- `icons/apple-touch-icon.png` per iPhone/iPad;
+- `icons/icon-192.png` e `icons/icon-512.png` per la PWA;
+- versioni `maskable` per launcher Android;
+- `icons/favicon-32.png` per la scheda del browser.
+
+Carica l'intera cartella `icons` senza modificare i nomi. Se la web app era già
+presente nella schermata Home di iPhone, eliminala e aggiungila nuovamente: iOS
+può conservare in cache la vecchia icona.
