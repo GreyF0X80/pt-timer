@@ -1,7 +1,7 @@
 {
-  "name": "KrioPlanet Timer",
-  "short_name": "KrioPlanet",
-  "description": "Timer offline per allenamenti HIIT, Tabata, forza e cardio.",
+  "name": "Timer",
+  "short_name": "Timer",
+  "description": "Timer offline personalizzabile per allenamenti HIIT, Tabata, forza e cardio.",
   "lang": "it-IT",
   "id": "./",
   "start_url": "./",

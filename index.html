@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="krio">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -27,7 +27,7 @@
         (function () {
             try {
                 var saved = JSON.parse(localStorage.getItem('kp_timer_preferences_v1') || '{}');
-                if (saved.theme && ['krio', 'ice', 'pulse', 'ember'].indexOf(saved.theme) !== -1) {
+                if (saved.theme && ['krio', 'ice', 'pulse', 'ember', 'aurora', 'neon'].indexOf(saved.theme) !== -1) {
                     document.documentElement.setAttribute('data-theme', saved.theme);
                 }
                 if (saved.reduceMotion === true) document.documentElement.classList.add('reduce-motion');
@@ -35,16 +35,16 @@
         }());
     </script>
 
-    <title>KrioPlanet Timer</title>
-    <meta name="application-name" content="KrioPlanet Timer">
-    <meta name="apple-mobile-web-app-title" content="KrioPlanet">
+    <title>Timer</title>
+    <meta name="application-name" content="Timer">
+    <meta name="apple-mobile-web-app-title" content="Timer">
     <meta name="description" content="Timer offline per allenamenti HIIT, Tabata, forza e cardio.">
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
     <style>
-        /* ==================== PALETTE KRIOPLANET & RESET ==================== */
+        /* ==================== PALETTE TIMER & RESET ==================== */
         :root {
             --bg-dark: #050b14;
             --bg-top: #0d1e30;
@@ -58,6 +58,11 @@
             --extra-blue: #00b4d8;
             --text-main: #ffffff;
             --text-muted: #8a99ad;
+            --ambient-a: rgba(0, 240, 255, 0.11);
+            --ambient-b: rgba(0, 114, 255, 0.10);
+            --surface-header: rgba(15, 30, 46, 0.86);
+            --surface-drawer: rgba(10, 20, 32, 0.96);
+            --surface-modal: rgba(5, 11, 20, 0.96);
             color-scheme: dark;
             background-color: var(--bg-dark);
         }
@@ -72,6 +77,11 @@
             --primary-cyan: #6ff7ff;
             --primary-blue: #00a8d6;
             --glow-cyan: rgba(111, 247, 255, 0.34);
+            --ambient-a: rgba(111, 247, 255, 0.12);
+            --ambient-b: rgba(0, 168, 214, 0.11);
+            --surface-header: rgba(8, 42, 54, 0.88);
+            --surface-drawer: rgba(4, 30, 39, 0.97);
+            --surface-modal: rgba(2, 21, 29, 0.97);
         }
 
         html[data-theme="pulse"] {
@@ -81,6 +91,11 @@
             --primary-cyan: #d78cff;
             --primary-blue: #7457ff;
             --glow-cyan: rgba(199, 111, 255, 0.34);
+            --ambient-a: rgba(215, 140, 255, 0.12);
+            --ambient-b: rgba(116, 87, 255, 0.12);
+            --surface-header: rgba(34, 17, 57, 0.88);
+            --surface-drawer: rgba(23, 12, 39, 0.97);
+            --surface-modal: rgba(11, 7, 21, 0.97);
         }
 
         html[data-theme="ember"] {
@@ -90,6 +105,39 @@
             --primary-cyan: #ffbf69;
             --primary-blue: #ff5f3b;
             --glow-cyan: rgba(255, 139, 70, 0.34);
+            --ambient-a: rgba(255, 191, 105, 0.12);
+            --ambient-b: rgba(255, 95, 59, 0.12);
+            --surface-header: rgba(55, 22, 12, 0.88);
+            --surface-drawer: rgba(39, 14, 8, 0.97);
+            --surface-modal: rgba(21, 8, 6, 0.97);
+        }
+
+        html[data-theme="aurora"] {
+            --bg-dark: #03120f;
+            --bg-top: #0b3428;
+            --bg-card: rgba(11, 50, 39, 0.78);
+            --primary-cyan: #63f5b0;
+            --primary-blue: #00bfa6;
+            --glow-cyan: rgba(99, 245, 176, 0.34);
+            --ambient-a: rgba(99, 245, 176, 0.13);
+            --ambient-b: rgba(0, 191, 166, 0.11);
+            --surface-header: rgba(11, 50, 39, 0.88);
+            --surface-drawer: rgba(6, 35, 28, 0.97);
+            --surface-modal: rgba(3, 18, 15, 0.97);
+        }
+
+        html[data-theme="neon"] {
+            --bg-dark: #140619;
+            --bg-top: #3a0d43;
+            --bg-card: rgba(54, 15, 63, 0.78);
+            --primary-cyan: #ff62d7;
+            --primary-blue: #00d9ff;
+            --glow-cyan: rgba(255, 98, 215, 0.34);
+            --ambient-a: rgba(255, 98, 215, 0.13);
+            --ambient-b: rgba(0, 217, 255, 0.11);
+            --surface-header: rgba(54, 15, 63, 0.88);
+            --surface-drawer: rgba(37, 9, 44, 0.97);
+            --surface-modal: rgba(20, 6, 25, 0.97);
         }
 
         html.reduce-motion *,
@@ -128,7 +176,11 @@
             min-height: 100vh;
             min-height: 100svh;
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 50% 20%, var(--bg-top) 0%, var(--bg-dark) 100%);
+            background-image:
+                radial-gradient(circle at 50% 18%, var(--bg-top) 0%, transparent 58%),
+                radial-gradient(circle at 12% 88%, var(--ambient-a) 0%, transparent 42%),
+                radial-gradient(circle at 90% 76%, var(--ambient-b) 0%, transparent 44%),
+                linear-gradient(var(--bg-dark), var(--bg-dark));
             background-repeat: no-repeat;
             background-size: cover;
             color: var(--text-main);
@@ -196,7 +248,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(15, 30, 46, 0.85);
+            background: var(--surface-header);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(0, 240, 255, 0.2);
@@ -213,8 +265,17 @@
             height: 28px;
             width: auto;
             display: block;
+            transition: filter 0.3s ease, box-shadow 0.3s ease;
+        }
+        #logo-header .brand-logo-krio {
             filter: brightness(0) invert(1) drop-shadow(0 0 4px var(--primary-cyan));
-            transition: filter 0.3s ease;
+        }
+        #logo-header .brand-logo-timer {
+            width: 28px;
+            border-radius: 7px;
+            object-fit: cover;
+            filter: none;
+            box-shadow: 0 0 8px var(--glow-cyan);
         }
         #logo-header .brand-name {
             font-size: 0.9rem;
@@ -234,7 +295,7 @@
             width: 340px;
             max-width: 85vw;
             height: 100%;
-            background: rgba(10, 20, 32, 0.95);
+            background: var(--surface-drawer);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid rgba(0, 240, 255, 0.2);
@@ -269,7 +330,16 @@
         #drawer-header .logo-large img {
             height: 38px;
             width: auto;
+        }
+        #drawer-header .logo-large .brand-logo-krio {
             filter: brightness(0) invert(1) drop-shadow(0 0 4px var(--primary-cyan));
+        }
+        #drawer-header .logo-large .brand-logo-timer {
+            width: 38px;
+            border-radius: 10px;
+            object-fit: cover;
+            filter: none;
+            box-shadow: 0 0 10px var(--glow-cyan);
         }
         #drawer-header .logo-large span {
             font-size: 1.2rem;
@@ -279,6 +349,25 @@
             -webkit-text-fill-color: transparent;
             letter-spacing: 2px;
         }
+
+        .brand-logo-timer,
+        .brand-name-timer {
+            display: none !important;
+        }
+
+        html:not([data-theme="krio"]) .brand-logo-krio,
+        html:not([data-theme="krio"]) .brand-name-krio {
+            display: none !important;
+        }
+
+        html:not([data-theme="krio"]) .brand-logo-timer {
+            display: block !important;
+        }
+
+        html:not([data-theme="krio"]) .brand-name-timer {
+            display: inline !important;
+        }
+
         #drawer-close {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -582,6 +671,8 @@
         .theme-swatch.ice { background: linear-gradient(135deg, #6ff7ff, #00a8d6); }
         .theme-swatch.pulse { background: linear-gradient(135deg, #d78cff, #7457ff); }
         .theme-swatch.ember { background: linear-gradient(135deg, #ffbf69, #ff5f3b); }
+        .theme-swatch.aurora { background: linear-gradient(135deg, #63f5b0, #00bfa6); }
+        .theme-swatch.neon { background: linear-gradient(135deg, #ff62d7, #00d9ff); }
 
         .settings-action-row {
             display: flex;
@@ -741,7 +832,7 @@
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(5, 11, 20, 0.95);
+            background: var(--surface-modal);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             display: none;
@@ -1100,9 +1191,11 @@
 <body>
 
     <!-- LOGO HEADER -->
-    <button id="logo-header" aria-label="Apri menu KrioPlanet">
-        <img src="Logo-Blu.svg" alt="KrioPlanet" id="logo-img">
-        <span class="brand-name">KRIOPLANET</span>
+    <button id="logo-header" aria-label="Apri menu Timer">
+        <img class="brand-logo brand-logo-krio" src="Logo-Blu.svg" alt="KrioPlanet">
+        <img class="brand-logo brand-logo-timer" src="./icons/icon-192.png" alt="Timer">
+        <span class="brand-name brand-name-krio">KRIOPLANET</span>
+        <span class="brand-name brand-name-timer">TIMER</span>
     </button>
 
     <!-- OVERLAY -->
@@ -1112,8 +1205,10 @@
     <div id="drawer">
         <div id="drawer-header">
             <div class="logo-large">
-                <img src="Logo-Blu.svg" alt="KrioPlanet">
-                <span>KRIOPLANET</span>
+                <img class="brand-logo brand-logo-krio" src="Logo-Blu.svg" alt="KrioPlanet">
+                <img class="brand-logo brand-logo-timer" src="./icons/icon-192.png" alt="Timer">
+                <span class="brand-name-krio">KRIOPLANET</span>
+                <span class="brand-name-timer">TIMER</span>
             </div>
             <button id="drawer-close" aria-label="Chiudi menu">✕</button>
         </div>
@@ -1240,6 +1335,8 @@
                     <button class="theme-btn" type="button" data-theme-choice="ice"><span class="theme-swatch ice"></span><span>Ghiaccio</span></button>
                     <button class="theme-btn" type="button" data-theme-choice="pulse"><span class="theme-swatch pulse"></span><span>Pulse</span></button>
                     <button class="theme-btn" type="button" data-theme-choice="ember"><span class="theme-swatch ember"></span><span>Energia</span></button>
+                    <button class="theme-btn" type="button" data-theme-choice="aurora"><span class="theme-swatch aurora"></span><span>Aurora</span></button>
+                    <button class="theme-btn" type="button" data-theme-choice="neon"><span class="theme-swatch neon"></span><span>Neon</span></button>
                 </div>
 
                 <div class="settings-toggle-row">
@@ -1260,10 +1357,10 @@
             <section class="settings-group" aria-labelledby="settings-info-title">
                 <h3 id="settings-info-title" class="settings-group-title">Informazioni</h3>
                 <div class="app-info-card">
-                    <div class="app-info-line"><span>App</span><strong>KrioPlanet Timer</strong></div>
-                    <div class="app-info-line"><span>Versione</span><strong id="app-version-label">1.1.0</strong></div>
+                    <div class="app-info-line"><span>App</span><strong>Timer</strong></div>
+                    <div class="app-info-line"><span>Versione</span><strong id="app-version-label">1.2.0</strong></div>
                     <div class="app-info-line"><span>Stato</span><span id="network-status" class="network-status"><span class="network-dot"></span><strong id="network-status-label">Online</strong></span></div>
-                    <div class="app-info-line"><span>Copyright</span><strong>© 2026 KrioPlanet</strong></div>
+                    <div class="app-info-line"><span>Copyright</span><strong>© 2026 MC</strong></div>
                 </div>
                 <div class="settings-action-row">
                     <button id="btn-reset-app-settings" class="settings-action-btn danger" type="button">RIPRISTINA IMPOSTAZIONI</button>
@@ -1332,7 +1429,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
-            var APP_VERSION = '1.1.0';
+            var APP_VERSION = '1.2.0';
             var PREFERENCES_KEY = 'kp_timer_preferences_v1';
             var DEFAULT_APP_PREFERENCES = {
                 soundEnabled: true,
@@ -1625,7 +1722,7 @@
             function sanitizePreferences(raw) {
                 var clean = Object.assign({}, DEFAULT_APP_PREFERENCES, raw || {});
                 if (['digital', 'energy', 'soft', 'retro'].indexOf(clean.soundProfile) === -1) clean.soundProfile = 'digital';
-                if (['krio', 'ice', 'pulse', 'ember'].indexOf(clean.theme) === -1) clean.theme = 'krio';
+                if (['krio', 'ice', 'pulse', 'ember', 'aurora', 'neon'].indexOf(clean.theme) === -1) clean.theme = 'krio';
                 clean.volume = Math.min(1, Math.max(0, Number(clean.volume)));
                 ['soundEnabled', 'countdownEnabled', 'vibrationEnabled', 'wakeLockEnabled', 'reduceMotion', 'tickEnabled'].forEach(function(key) {
                     clean[key] = clean[key] === true;
@@ -1656,7 +1753,9 @@
                     krio: '#050b14',
                     ice: '#02151d',
                     pulse: '#0b0715',
-                    ember: '#150806'
+                    ember: '#150806',
+                    aurora: '#03120f',
+                    neon: '#140619'
                 }[name] || '#050b14';
             }
 
