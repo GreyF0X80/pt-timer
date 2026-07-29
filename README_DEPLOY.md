@@ -1,4 +1,4 @@
-# Timer — PWA offline v1.2.0
+# Timer — PWA offline v1.3.0
 
 ## Pubblicazione su GitHub Pages
 
@@ -37,8 +37,21 @@ Ogni tema modifica colori principali, superfici, bagliori, sfondo e colore delle
 La sezione Informazioni mostra:
 
 - App: `Timer`;
-- Versione: `1.2.0`;
+- Versione: `1.3.0`;
 - Copyright: `© 2026 MC`.
+
+## Suoni e avvisi fine fase
+
+La versione 1.3.0 aggiunge due stili sonori normali (`Campana` e `Minimal`) e una selezione indipendente per l’avviso allo scadere di ogni fase:
+
+- Come stile suono;
+- Campana doppia;
+- Sveglia;
+- Sirena;
+- Buzzer industriale;
+- Fischietto.
+
+Gli avvisi **Sveglia**, **Sirena** e **Buzzer** sono progettati per risultare riconoscibili anche in ambienti rumorosi. È consigliato provarli inizialmente con un volume basso. Tutti i suoni sono generati localmente tramite Web Audio API: non servono file audio esterni e il funzionamento resta completamente offline.
 
 ## Offline
 
@@ -46,4 +59,4 @@ Dopo il primo caricamento online, HTML, manifest, icone e logo vengono salvati n
 
 ## Nota Service Worker
 
-Il Service Worker funziona su HTTPS o localhost. GitHub Pages usa HTTPS e non richiede configurazioni aggiuntive. La cache di questa release è `timer-v5-brand-themes-2026-07-29`.
+Il Service Worker funziona su HTTPS o localhost. GitHub Pages usa HTTPS e non richiede configurazioni aggiuntive. La cache di questa release è `timer-v6-sound-alerts-2026-07-29`.

@@ -605,7 +605,8 @@
         }
 
         .settings-select {
-            max-width: 138px;
+            width: 150px;
+            max-width: 150px;
             min-height: 34px;
             border: 1px solid rgba(0,240,255,0.28);
             border-radius: 9px;
@@ -614,6 +615,18 @@
             padding: 5px 28px 5px 9px;
             font-size: 0.74rem;
             outline: none;
+        }
+
+        .alert-sound-note {
+            margin-top: 5px;
+            padding: 7px 9px;
+            border-left: 2px solid var(--warning-yellow);
+            border-radius: 0 8px 8px 0;
+            background: rgba(255, 193, 7, 0.055);
+        }
+        .alert-sound-note strong {
+            color: var(--warning-yellow);
+            font-weight: 700;
         }
 
         .volume-control {
@@ -1297,8 +1310,23 @@
                         <option value="energy">Energia</option>
                         <option value="soft">Morbido</option>
                         <option value="retro">Retro</option>
+                        <option value="bell">Campana</option>
+                        <option value="minimal">Minimal</option>
                     </select>
                 </div>
+
+                <div class="settings-field">
+                    <div><label for="end-alert-select">Avviso fine fase</label><small>Segnale usato allo scadere di lavoro, recupero ed extra</small></div>
+                    <select id="end-alert-select" class="settings-select" aria-label="Avviso fine fase">
+                        <option value="profile">Come stile suono</option>
+                        <option value="double-bell">Campana doppia</option>
+                        <option value="alarm">Sveglia</option>
+                        <option value="siren">Sirena</option>
+                        <option value="buzzer">Buzzer industriale</option>
+                        <option value="whistle">Fischietto</option>
+                    </select>
+                </div>
+                <p class="settings-help alert-sound-note"><strong>Ambienti rumorosi:</strong> Sveglia, Sirena e Buzzer sono volutamente molto incisivi. Provali iniziando da un volume basso.</p>
 
                 <div class="settings-field">
                     <div><label for="sound-volume">Volume</label><small>Valido per tutti i segnali</small></div>
@@ -1324,7 +1352,8 @@
                 </div>
 
                 <div class="settings-action-row">
-                    <button id="btn-preview-sound" class="settings-action-btn" type="button">▶ PROVA SUONO</button>
+                    <button id="btn-preview-sound" class="settings-action-btn" type="button">▶ PROVA STILE</button>
+                    <button id="btn-preview-end-alert" class="settings-action-btn" type="button">🔔 PROVA FINE FASE</button>
                 </div>
             </section>
 
@@ -1358,7 +1387,7 @@
                 <h3 id="settings-info-title" class="settings-group-title">Informazioni</h3>
                 <div class="app-info-card">
                     <div class="app-info-line"><span>App</span><strong>Timer</strong></div>
-                    <div class="app-info-line"><span>Versione</span><strong id="app-version-label">1.2.0</strong></div>
+                    <div class="app-info-line"><span>Versione</span><strong id="app-version-label">1.3.0</strong></div>
                     <div class="app-info-line"><span>Stato</span><span id="network-status" class="network-status"><span class="network-dot"></span><strong id="network-status-label">Online</strong></span></div>
                     <div class="app-info-line"><span>Copyright</span><strong>© 2026 MC</strong></div>
                 </div>
@@ -1429,11 +1458,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
-            var APP_VERSION = '1.2.0';
+            var APP_VERSION = '1.3.0';
             var PREFERENCES_KEY = 'kp_timer_preferences_v1';
             var DEFAULT_APP_PREFERENCES = {
                 soundEnabled: true,
                 soundProfile: 'digital',
+                endAlertProfile: 'profile',
                 volume: 0.65,
                 countdownEnabled: true,
                 vibrationEnabled: true,
@@ -1526,6 +1556,7 @@
             var appSettingsPanel = document.getElementById('app-settings-panel');
             var soundToggle = document.getElementById('sound-toggle');
             var soundProfileSelect = document.getElementById('sound-profile-select');
+            var endAlertSelect = document.getElementById('end-alert-select');
             var soundVolume = document.getElementById('sound-volume');
             var soundVolumeValue = document.getElementById('sound-volume-value');
             var countdownSoundToggle = document.getElementById('countdown-sound-toggle');
@@ -1534,6 +1565,7 @@
             var reduceMotionToggle = document.getElementById('reduce-motion-toggle');
             var themeButtons = document.querySelectorAll('[data-theme-choice]');
             var btnPreviewSound = document.getElementById('btn-preview-sound');
+            var btnPreviewEndAlert = document.getElementById('btn-preview-end-alert');
             var btnResetAppSettings = document.getElementById('btn-reset-app-settings');
             var appVersionLabel = document.getElementById('app-version-label');
             var networkStatus = document.getElementById('network-status');
@@ -1582,10 +1614,38 @@
             // AUDIO PERSONALIZZABILE
             var audioCtx = null;
             var SOUND_PROFILES = {
-                digital: { oscillator: 'sine', frequencyScale: 1.00, gainScale: 1.00 },
-                energy:  { oscillator: 'square', frequencyScale: 1.16, gainScale: 0.72 },
-                soft:    { oscillator: 'sine', frequencyScale: 0.82, gainScale: 0.65 },
-                retro:   { oscillator: 'triangle', frequencyScale: 1.00, gainScale: 0.82 }
+                digital: { oscillator: 'sine',     frequencyScale: 1.00, gainScale: 1.00, attack: 0.012 },
+                energy:  { oscillator: 'square',   frequencyScale: 1.16, gainScale: 0.72, attack: 0.006 },
+                soft:    { oscillator: 'sine',     frequencyScale: 0.82, gainScale: 0.65, attack: 0.025 },
+                retro:   { oscillator: 'triangle', frequencyScale: 1.00, gainScale: 0.82, attack: 0.010 },
+                bell:    { oscillator: 'sine',     frequencyScale: 0.94, gainScale: 0.92, attack: 0.004, harmonic: 2.01 },
+                minimal: { oscillator: 'square',   frequencyScale: 1.30, gainScale: 0.45, attack: 0.002 }
+            };
+
+            var END_ALERT_PATTERNS = {
+                'double-bell': [
+                    { at: 0,   freq: 660, duration: 260, oscillator: 'sine', gain: 0.92, harmonic: 2.01 },
+                    { at: 300, freq: 880, duration: 420, oscillator: 'sine', gain: 1.00, harmonic: 2.00 }
+                ],
+                alarm: [
+                    { at: 0,   freq: 980, duration: 120, oscillator: 'square', gain: 0.78 },
+                    { at: 155, freq: 980, duration: 120, oscillator: 'square', gain: 0.78 },
+                    { at: 310, freq: 980, duration: 120, oscillator: 'square', gain: 0.78 },
+                    { at: 465, freq: 980, duration: 160, oscillator: 'square', gain: 0.82 }
+                ],
+                siren: [
+                    { at: 0,   freq: 520, endFreq: 1180, duration: 430, oscillator: 'sawtooth', gain: 0.62 },
+                    { at: 455, freq: 1180, endFreq: 520, duration: 430, oscillator: 'sawtooth', gain: 0.62 }
+                ],
+                buzzer: [
+                    { at: 0,   freq: 185, duration: 210, oscillator: 'sawtooth', gain: 0.80 },
+                    { at: 245, freq: 185, duration: 210, oscillator: 'sawtooth', gain: 0.80 },
+                    { at: 490, freq: 245, duration: 280, oscillator: 'square', gain: 0.76 }
+                ],
+                whistle: [
+                    { at: 0,   freq: 1750, endFreq: 2200, duration: 180, oscillator: 'sine', gain: 0.74 },
+                    { at: 220, freq: 2050, duration: 260, oscillator: 'sine', gain: 0.78 }
+                ]
             };
 
             function initAudio() {
@@ -1595,9 +1655,8 @@
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             }
 
-            function playBeep(freq, duration, forcePreview) {
-                freq = freq || 800;
-                duration = duration || 80;
+            function playTone(options, forcePreview) {
+                options = options || {};
                 if (!forcePreview && !appPreferences.soundEnabled) return;
                 if (appPreferences.volume <= 0) return;
 
@@ -1605,23 +1664,71 @@
                     initAudio();
                     if (!audioCtx) return;
 
-                    var profile = SOUND_PROFILES[appPreferences.soundProfile] || SOUND_PROFILES.digital;
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
                     var now = audioCtx.currentTime;
-                    var level = Math.max(0.001, 0.28 * appPreferences.volume * profile.gainScale);
+                    var duration = Math.max(20, Number(options.duration) || 80);
+                    var oscillatorType = options.oscillator || 'sine';
+                    var baseGain = Number(options.gain);
+                    if (!Number.isFinite(baseGain)) baseGain = 1;
+                    var level = Math.max(0.001, 0.28 * appPreferences.volume * baseGain);
+                    var attack = Math.max(0.002, Number(options.attack) || 0.008);
 
-                    osc.type = profile.oscillator;
-                    osc.frequency.value = freq * profile.frequencyScale;
-                    gain.gain.setValueAtTime(0.001, now);
-                    gain.gain.exponentialRampToValueAtTime(level, now + 0.012);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration / 1000);
+                    function createOscillator(frequency, oscillatorGain, harmonicRatio) {
+                        var osc = audioCtx.createOscillator();
+                        var gain = audioCtx.createGain();
+                        var startFreq = Math.max(20, frequency * (harmonicRatio || 1));
+                        var targetFreq = Number(options.endFreq);
+                        if (Number.isFinite(targetFreq)) targetFreq = Math.max(20, targetFreq * (harmonicRatio || 1));
 
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now);
-                    osc.stop(now + duration / 1000 + 0.02);
+                        osc.type = oscillatorType;
+                        osc.frequency.setValueAtTime(startFreq, now);
+                        if (Number.isFinite(targetFreq)) {
+                            osc.frequency.exponentialRampToValueAtTime(targetFreq, now + duration / 1000);
+                        }
+
+                        gain.gain.setValueAtTime(0.001, now);
+                        gain.gain.exponentialRampToValueAtTime(Math.max(0.001, level * oscillatorGain), now + attack);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + duration / 1000);
+
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now);
+                        osc.stop(now + duration / 1000 + 0.03);
+                    }
+
+                    createOscillator(Math.max(20, Number(options.freq) || 800), 1, 1);
+                    if (options.harmonic) createOscillator(Math.max(20, Number(options.freq) || 800), 0.20, Number(options.harmonic));
                 } catch (e) {}
+            }
+
+            function playBeep(freq, duration, forcePreview) {
+                freq = freq || 800;
+                duration = duration || 80;
+                var profile = SOUND_PROFILES[appPreferences.soundProfile] || SOUND_PROFILES.digital;
+                playTone({
+                    freq: freq * profile.frequencyScale,
+                    duration: duration,
+                    oscillator: profile.oscillator,
+                    gain: profile.gainScale,
+                    attack: profile.attack,
+                    harmonic: profile.harmonic
+                }, forcePreview);
+            }
+
+            function playAlertPattern(name, forcePreview) {
+                var pattern = END_ALERT_PATTERNS[name];
+                if (!pattern) {
+                    playBeep(400, 600, forcePreview);
+                    return;
+                }
+                pattern.forEach(function(step) {
+                    setTimeout(function() { playTone(step, forcePreview); }, step.at || 0);
+                });
+            }
+
+            function playEndAlert(forcePreview) {
+                var selected = appPreferences.endAlertProfile || 'profile';
+                if (selected === 'profile') playBeep(400, 600, forcePreview);
+                else playAlertPattern(selected, forcePreview);
             }
 
             function playCountdownTick(seconds) {
@@ -1636,7 +1743,7 @@
                     playCountdownTick(seconds);
                 }
             }
-            function playGong() { playBeep(400, 600); }
+            function playGong() { playEndAlert(false); }
             function playExtraAlert() {
                 playBeep(600, 150);
                 setTimeout(function() { playBeep(900, 150); }, 180);
@@ -1648,6 +1755,11 @@
                 playBeep(620, 120, true);
                 setTimeout(function() { playBeep(860, 120, true); }, 160);
                 setTimeout(function() { playBeep(1100, 220, true); }, 320);
+            }
+
+            function previewEndAlert() {
+                initAudio();
+                playEndAlert(true);
             }
 
             function calculateTotalDuration() {
@@ -1721,7 +1833,8 @@
 
             function sanitizePreferences(raw) {
                 var clean = Object.assign({}, DEFAULT_APP_PREFERENCES, raw || {});
-                if (['digital', 'energy', 'soft', 'retro'].indexOf(clean.soundProfile) === -1) clean.soundProfile = 'digital';
+                if (['digital', 'energy', 'soft', 'retro', 'bell', 'minimal'].indexOf(clean.soundProfile) === -1) clean.soundProfile = 'digital';
+                if (['profile', 'double-bell', 'alarm', 'siren', 'buzzer', 'whistle'].indexOf(clean.endAlertProfile) === -1) clean.endAlertProfile = 'profile';
                 if (['krio', 'ice', 'pulse', 'ember', 'aurora', 'neon'].indexOf(clean.theme) === -1) clean.theme = 'krio';
                 clean.volume = Math.min(1, Math.max(0, Number(clean.volume)));
                 ['soundEnabled', 'countdownEnabled', 'vibrationEnabled', 'wakeLockEnabled', 'reduceMotion', 'tickEnabled'].forEach(function(key) {
@@ -1786,6 +1899,7 @@
                 setSwitchState(reduceMotionToggle, appPreferences.reduceMotion);
 
                 soundProfileSelect.value = appPreferences.soundProfile;
+                endAlertSelect.value = appPreferences.endAlertProfile;
                 soundVolume.value = Math.round(appPreferences.volume * 100);
                 soundVolumeValue.textContent = Math.round(appPreferences.volume * 100) + '%';
                 document.documentElement.classList.toggle('reduce-motion', appPreferences.reduceMotion);
@@ -1844,6 +1958,12 @@
                 previewSelectedSound();
             });
 
+            endAlertSelect.addEventListener('change', function() {
+                appPreferences.endAlertProfile = this.value;
+                saveAppPreferences();
+                previewEndAlert();
+            });
+
             soundVolume.addEventListener('input', function() {
                 appPreferences.volume = Math.min(1, Math.max(0, Number(this.value) / 100));
                 soundVolumeValue.textContent = this.value + '%';
@@ -1862,6 +1982,7 @@
             });
 
             btnPreviewSound.addEventListener('click', previewSelectedSound);
+            btnPreviewEndAlert.addEventListener('click', previewEndAlert);
 
             btnResetAppSettings.addEventListener('click', function() {
                 if (!confirm('Ripristinare tutte le impostazioni dell’app? I workout salvati non verranno eliminati.')) return;
@@ -2219,7 +2340,7 @@
             function startRestInterval(carryMs) {
                 runAccuratePhase(function(overshootMs) {
                     if (shouldSignalTransition(overshootMs)) {
-                        playBeep(1200, 80);
+                        playEndAlert(false);
                         triggerVibration([200, 100, 200]);
                     }
                     var shouldTriggerExtra = (settings.extraEvery > 0) &&
@@ -2236,7 +2357,7 @@
             function startExtraInterval(carryMs) {
                 runAccuratePhase(function(overshootMs) {
                     if (shouldSignalTransition(overshootMs)) {
-                        playBeep(1000, 400);
+                        playEndAlert(false);
                         triggerVibration([300]);
                     }
                     startWorkPhase(overshootMs);
@@ -2367,7 +2488,7 @@
                     if (timerState.currentRound >= timerState.totalRounds) finishWorkout();
                     else startRestPhase();
                 } else if (s === 'rest') {
-                    playBeep(1200, 80);
+                    playEndAlert(false);
                     triggerVibration([100]);
                     var shouldTriggerExtra = (settings.extraEvery > 0) &&
                         (timerState.currentRound % settings.extraEvery === 0) &&
@@ -2378,7 +2499,7 @@
                         startExtraPhase();
                     } else startWorkPhase();
                 } else if (s === 'extra') {
-                    playBeep(1000, 200); triggerVibration([100]); startWorkPhase();
+                    playEndAlert(false); triggerVibration([100]); startWorkPhase();
                 }
                 updateUI();
             }
