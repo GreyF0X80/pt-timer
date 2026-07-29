@@ -40,3 +40,19 @@ Questa versione include la nuova icona in tutti i formati necessari:
 Carica l'intera cartella `icons` senza modificare i nomi. Se la web app era già
 presente nella schermata Home di iPhone, eliminala e aggiungila nuovamente: iOS
 può conservare in cache la vecchia icona.
+
+
+## Novità v1.1.0
+
+Nel menu laterale è disponibile **Impostazioni app** con:
+
+- attivazione/disattivazione dei suoni;
+- quattro profili sonori e controllo volume;
+- avvisi negli ultimi tre secondi, tick e vibrazione separati;
+- quattro temi grafici;
+- riduzione delle animazioni;
+- controllo dello schermo sempre acceso durante il timer;
+- stato online/offline, versione e copyright;
+- ripristino delle sole preferenze, senza eliminare i workout salvati.
+
+Dopo aver pubblicato i file, apri una volta la pagina online e ricaricala. Il Service Worker v4 sostituirà automaticamente la vecchia cache.

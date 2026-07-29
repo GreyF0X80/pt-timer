@@ -20,6 +20,21 @@
         }());
     </script>
 
+
+
+    <script>
+        /* Applica il tema salvato prima del rendering per evitare lampeggi. */
+        (function () {
+            try {
+                var saved = JSON.parse(localStorage.getItem('kp_timer_preferences_v1') || '{}');
+                if (saved.theme && ['krio', 'ice', 'pulse', 'ember'].indexOf(saved.theme) !== -1) {
+                    document.documentElement.setAttribute('data-theme', saved.theme);
+                }
+                if (saved.reduceMotion === true) document.documentElement.classList.add('reduce-motion');
+            } catch (e) {}
+        }());
+    </script>
+
     <title>KrioPlanet Timer</title>
     <meta name="application-name" content="KrioPlanet Timer">
     <meta name="apple-mobile-web-app-title" content="KrioPlanet">
@@ -32,6 +47,7 @@
         /* ==================== PALETTE KRIOPLANET & RESET ==================== */
         :root {
             --bg-dark: #050b14;
+            --bg-top: #0d1e30;
             --bg-card: rgba(15, 30, 46, 0.75);
             --primary-cyan: #00f0ff;
             --primary-blue: #0072ff;
@@ -44,6 +60,45 @@
             --text-muted: #8a99ad;
             color-scheme: dark;
             background-color: var(--bg-dark);
+        }
+
+
+
+        /* ==================== TEMI PERSONALIZZABILI ==================== */
+        html[data-theme="ice"] {
+            --bg-dark: #02151d;
+            --bg-top: #0a3441;
+            --bg-card: rgba(8, 42, 54, 0.78);
+            --primary-cyan: #6ff7ff;
+            --primary-blue: #00a8d6;
+            --glow-cyan: rgba(111, 247, 255, 0.34);
+        }
+
+        html[data-theme="pulse"] {
+            --bg-dark: #0b0715;
+            --bg-top: #281044;
+            --bg-card: rgba(34, 17, 57, 0.78);
+            --primary-cyan: #d78cff;
+            --primary-blue: #7457ff;
+            --glow-cyan: rgba(199, 111, 255, 0.34);
+        }
+
+        html[data-theme="ember"] {
+            --bg-dark: #150806;
+            --bg-top: #3a170d;
+            --bg-card: rgba(55, 22, 12, 0.78);
+            --primary-cyan: #ffbf69;
+            --primary-blue: #ff5f3b;
+            --glow-cyan: rgba(255, 139, 70, 0.34);
+        }
+
+        html.reduce-motion *,
+        html.reduce-motion *::before,
+        html.reduce-motion *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.001ms !important;
         }
 
         * {
@@ -73,7 +128,7 @@
             min-height: 100vh;
             min-height: 100svh;
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 50% 20%, #0d1e30 0%, var(--bg-dark) 100%);
+            background-image: radial-gradient(circle at 50% 20%, var(--bg-top) 0%, var(--bg-dark) 100%);
             background-repeat: no-repeat;
             background-size: cover;
             color: var(--text-main);
@@ -360,6 +415,229 @@
         }
         #drawer .switch.active::after {
             transform: translateX(20px);
+        }
+
+
+
+        /* ==================== NAVIGAZIONE E IMPOSTAZIONI APP ==================== */
+        .drawer-section-title {
+            margin: 2px 2px 10px;
+            color: var(--text-muted);
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+        }
+
+        .drawer-nav-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 13px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.045);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font: inherit;
+            font-size: 0.86rem;
+            font-weight: 650;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+        .drawer-nav-btn:active { transform: scale(0.98); }
+        .drawer-nav-btn[aria-expanded="true"] {
+            border-color: rgba(0, 240, 255, 0.35);
+            background: rgba(0, 240, 255, 0.07);
+        }
+        .drawer-nav-btn .chevron {
+            color: var(--primary-cyan);
+            font-size: 1rem;
+            transition: transform 0.25s ease;
+        }
+        .drawer-nav-btn[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+        .app-settings-panel {
+            display: none;
+            margin-top: 9px;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.2);
+        }
+        .app-settings-panel.open { display: block; }
+
+        .settings-group + .settings-group {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .settings-group-title {
+            margin-bottom: 9px;
+            color: var(--primary-cyan);
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .settings-field,
+        .settings-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 42px;
+            padding: 7px 2px;
+        }
+        .settings-field > div:first-child,
+        .settings-toggle-row > div:first-child {
+            flex: 1;
+            min-width: 0;
+        }
+        .settings-field label,
+        .settings-toggle-row label {
+            display: block;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: 550;
+        }
+        .settings-field small,
+        .settings-toggle-row small,
+        .settings-help {
+            display: block;
+            margin-top: 2px;
+            color: var(--text-muted);
+            font-size: 0.66rem;
+            line-height: 1.35;
+        }
+
+        .settings-select {
+            max-width: 138px;
+            min-height: 34px;
+            border: 1px solid rgba(0,240,255,0.28);
+            border-radius: 9px;
+            background: rgba(5,11,20,0.85);
+            color: var(--text-main);
+            padding: 5px 28px 5px 9px;
+            font-size: 0.74rem;
+            outline: none;
+        }
+
+        .volume-control {
+            display: grid;
+            grid-template-columns: 1fr 38px;
+            align-items: center;
+            gap: 8px;
+            width: 155px;
+        }
+        .volume-control input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-cyan);
+        }
+        .volume-control output {
+            color: var(--primary-cyan);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .theme-btn {
+            position: relative;
+            min-height: 48px;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 11px;
+            background: rgba(255,255,255,0.035);
+            color: var(--text-main);
+            font: inherit;
+            font-size: 0.72rem;
+            font-weight: 650;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+        }
+        .theme-btn.active {
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 12px var(--glow-cyan);
+        }
+        .theme-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+        .theme-swatch.krio { background: linear-gradient(135deg, #00f0ff, #0072ff); }
+        .theme-swatch.ice { background: linear-gradient(135deg, #6ff7ff, #00a8d6); }
+        .theme-swatch.pulse { background: linear-gradient(135deg, #d78cff, #7457ff); }
+        .theme-swatch.ember { background: linear-gradient(135deg, #ffbf69, #ff5f3b); }
+
+        .settings-action-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 9px;
+        }
+        .settings-action-btn {
+            flex: 1;
+            min-height: 38px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,240,255,0.28);
+            background: rgba(0,240,255,0.08);
+            color: var(--primary-cyan);
+            font: inherit;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .settings-action-btn.danger {
+            border-color: rgba(255,77,109,0.35);
+            background: rgba(255,77,109,0.08);
+            color: var(--rest-red);
+        }
+        .settings-action-btn:active { transform: scale(0.97); }
+
+        .app-info-card {
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .app-info-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 4px 0;
+            color: var(--text-muted);
+            font-size: 0.68rem;
+        }
+        .app-info-line strong { color: var(--text-main); font-weight: 650; }
+        .network-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-main);
+        }
+        .network-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--work-green);
+            box-shadow: 0 0 7px rgba(56,239,125,0.6);
+        }
+        .network-status.offline .network-dot {
+            background: var(--warning-yellow);
+            box-shadow: 0 0 7px rgba(255,193,7,0.6);
         }
 
         /* SECTION SALVA PRESET DENTRO IL DRAWER */
@@ -840,7 +1118,8 @@
             <button id="drawer-close" aria-label="Chiudi menu">✕</button>
         </div>
 
-        <!-- IMPOSTAZIONI -->
+        <!-- CONFIGURAZIONE ALLENAMENTO -->
+        <div class="drawer-section-title">Allenamento</div>
         <div id="setup-inside-drawer">
             <div class="row">
                 <label>⏱ Lavoro</label>
@@ -883,11 +1162,6 @@
                     <button id="inc-extra-dur">+</button>
                 </div>
             </div>
-            <div class="toggle-row">
-                <label>🎵 Tick</label>
-                <div class="switch" id="tick-toggle"></div>
-            </div>
-
             <!-- SALVA IN LIBRERIA DIRECTLY FROM DRAWER -->
             <div class="drawer-save-section">
                 <input type="text" id="drawer-save-name" placeholder="Nome workout (es. Gambe)" maxlength="25">
@@ -905,6 +1179,98 @@
 
         <!-- BOTTONE LIBRERIA -->
         <button id="btn-open-library">📁 Apri Libreria (0)</button>
+
+        <!-- IMPOSTAZIONI APP -->
+        <button id="btn-toggle-app-settings" class="drawer-nav-btn" type="button" aria-expanded="false" aria-controls="app-settings-panel">
+            <span>⚙️ Impostazioni app</span>
+            <span class="chevron" aria-hidden="true">⌄</span>
+        </button>
+
+        <div id="app-settings-panel" class="app-settings-panel" aria-hidden="true">
+            <section class="settings-group" aria-labelledby="settings-audio-title">
+                <h3 id="settings-audio-title" class="settings-group-title">Suoni e feedback</h3>
+
+                <div class="settings-toggle-row">
+                    <div><label for="sound-toggle">Suoni</label><small>Segnali di fase e completamento</small></div>
+                    <div class="switch active" id="sound-toggle" role="switch" tabindex="0" aria-checked="true" aria-label="Attiva suoni"></div>
+                </div>
+
+                <div class="settings-field">
+                    <div><label for="sound-profile-select">Stile suono</label><small>Personalizza il carattere degli avvisi</small></div>
+                    <select id="sound-profile-select" class="settings-select" aria-label="Stile suono">
+                        <option value="digital">Krio Digital</option>
+                        <option value="energy">Energia</option>
+                        <option value="soft">Morbido</option>
+                        <option value="retro">Retro</option>
+                    </select>
+                </div>
+
+                <div class="settings-field">
+                    <div><label for="sound-volume">Volume</label><small>Valido per tutti i segnali</small></div>
+                    <div class="volume-control">
+                        <input id="sound-volume" type="range" min="0" max="100" step="5" value="65" aria-label="Volume suoni">
+                        <output id="sound-volume-value" for="sound-volume">65%</output>
+                    </div>
+                </div>
+
+                <div class="settings-toggle-row">
+                    <div><label for="countdown-sound-toggle">Suoni ultimi 3 secondi</label><small>Avviso prima del cambio fase</small></div>
+                    <div class="switch active" id="countdown-sound-toggle" role="switch" tabindex="0" aria-checked="true" aria-label="Attiva suoni ultimi 3 secondi"></div>
+                </div>
+
+                <div class="settings-toggle-row">
+                    <div><label for="tick-toggle">Tick durante il lavoro</label><small>Metronomo ogni secondo</small></div>
+                    <div class="switch" id="tick-toggle" role="switch" tabindex="0" aria-checked="false" aria-label="Attiva tick durante il lavoro"></div>
+                </div>
+
+                <div class="settings-toggle-row">
+                    <div><label for="vibration-toggle">Vibrazione</label><small>Quando supportata dal dispositivo</small></div>
+                    <div class="switch active" id="vibration-toggle" role="switch" tabindex="0" aria-checked="true" aria-label="Attiva vibrazione"></div>
+                </div>
+
+                <div class="settings-action-row">
+                    <button id="btn-preview-sound" class="settings-action-btn" type="button">▶ PROVA SUONO</button>
+                </div>
+            </section>
+
+            <section class="settings-group" aria-labelledby="settings-theme-title">
+                <h3 id="settings-theme-title" class="settings-group-title">Tema</h3>
+                <div class="theme-grid" role="group" aria-label="Selezione tema">
+                    <button class="theme-btn active" type="button" data-theme-choice="krio"><span class="theme-swatch krio"></span><span>Krio</span></button>
+                    <button class="theme-btn" type="button" data-theme-choice="ice"><span class="theme-swatch ice"></span><span>Ghiaccio</span></button>
+                    <button class="theme-btn" type="button" data-theme-choice="pulse"><span class="theme-swatch pulse"></span><span>Pulse</span></button>
+                    <button class="theme-btn" type="button" data-theme-choice="ember"><span class="theme-swatch ember"></span><span>Energia</span></button>
+                </div>
+
+                <div class="settings-toggle-row">
+                    <div><label for="reduce-motion-toggle">Riduci animazioni</label><small>Più sobrio e leggermente più efficiente</small></div>
+                    <div class="switch" id="reduce-motion-toggle" role="switch" tabindex="0" aria-checked="false" aria-label="Riduci animazioni"></div>
+                </div>
+            </section>
+
+            <section class="settings-group" aria-labelledby="settings-device-title">
+                <h3 id="settings-device-title" class="settings-group-title">Dispositivo</h3>
+                <div class="settings-toggle-row">
+                    <div><label for="wake-lock-toggle">Schermo sempre acceso</label><small>Solo mentre il timer è in esecuzione</small></div>
+                    <div class="switch active" id="wake-lock-toggle" role="switch" tabindex="0" aria-checked="true" aria-label="Mantieni schermo acceso"></div>
+                </div>
+                <p class="settings-help">Le preferenze e i workout restano salvati esclusivamente su questo dispositivo.</p>
+            </section>
+
+            <section class="settings-group" aria-labelledby="settings-info-title">
+                <h3 id="settings-info-title" class="settings-group-title">Informazioni</h3>
+                <div class="app-info-card">
+                    <div class="app-info-line"><span>App</span><strong>KrioPlanet Timer</strong></div>
+                    <div class="app-info-line"><span>Versione</span><strong id="app-version-label">1.1.0</strong></div>
+                    <div class="app-info-line"><span>Stato</span><span id="network-status" class="network-status"><span class="network-dot"></span><strong id="network-status-label">Online</strong></span></div>
+                    <div class="app-info-line"><span>Copyright</span><strong>© 2026 KrioPlanet</strong></div>
+                </div>
+                <div class="settings-action-row">
+                    <button id="btn-reset-app-settings" class="settings-action-btn danger" type="button">RIPRISTINA IMPOSTAZIONI</button>
+                </div>
+            </section>
+        </div>
+
     </div>
 
     <!-- MODALE LIBRERIA WORKOUT -->
@@ -966,7 +1332,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             "use strict";
 
+            var APP_VERSION = '1.1.0';
+            var PREFERENCES_KEY = 'kp_timer_preferences_v1';
+            var DEFAULT_APP_PREFERENCES = {
+                soundEnabled: true,
+                soundProfile: 'digital',
+                volume: 0.65,
+                countdownEnabled: true,
+                vibrationEnabled: true,
+                wakeLockEnabled: true,
+                reduceMotion: false,
+                theme: 'krio',
+                tickEnabled: false
+            };
+            var appPreferences = Object.assign({}, DEFAULT_APP_PREFERENCES);
+
             function triggerVibration(pattern) {
+                if (!appPreferences.vibrationEnabled) return;
                 if (navigator.vibrate) navigator.vibrate(pattern);
             }
 
@@ -1042,6 +1424,24 @@
             var presetBtns = document.querySelectorAll('#drawer .preset-btn[data-preset]');
             var tickToggle = document.getElementById('tick-toggle');
 
+            // DOM Impostazioni app
+            var btnToggleAppSettings = document.getElementById('btn-toggle-app-settings');
+            var appSettingsPanel = document.getElementById('app-settings-panel');
+            var soundToggle = document.getElementById('sound-toggle');
+            var soundProfileSelect = document.getElementById('sound-profile-select');
+            var soundVolume = document.getElementById('sound-volume');
+            var soundVolumeValue = document.getElementById('sound-volume-value');
+            var countdownSoundToggle = document.getElementById('countdown-sound-toggle');
+            var vibrationToggle = document.getElementById('vibration-toggle');
+            var wakeLockToggle = document.getElementById('wake-lock-toggle');
+            var reduceMotionToggle = document.getElementById('reduce-motion-toggle');
+            var themeButtons = document.querySelectorAll('[data-theme-choice]');
+            var btnPreviewSound = document.getElementById('btn-preview-sound');
+            var btnResetAppSettings = document.getElementById('btn-reset-app-settings');
+            var appVersionLabel = document.getElementById('app-version-label');
+            var networkStatus = document.getElementById('network-status');
+            var networkStatusLabel = document.getElementById('network-status-label');
+
             // DOM Libreria Modal & Save Drawer
             var libraryItemsList = document.getElementById('library-items-list');
             var drawerSaveName = document.getElementById('drawer-save-name');
@@ -1082,8 +1482,15 @@
                 extraTriggeredThisRound: false
             };
 
-            // AUDIO
+            // AUDIO PERSONALIZZABILE
             var audioCtx = null;
+            var SOUND_PROFILES = {
+                digital: { oscillator: 'sine', frequencyScale: 1.00, gainScale: 1.00 },
+                energy:  { oscillator: 'square', frequencyScale: 1.16, gainScale: 0.72 },
+                soft:    { oscillator: 'sine', frequencyScale: 0.82, gainScale: 0.65 },
+                retro:   { oscillator: 'triangle', frequencyScale: 1.00, gainScale: 0.82 }
+            };
+
             function initAudio() {
                 if (!audioCtx) {
                     try { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
@@ -1091,21 +1498,39 @@
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             }
 
-            function playBeep(freq, duration) {
-                freq = freq || 800; duration = duration || 80;
+            function playBeep(freq, duration, forcePreview) {
+                freq = freq || 800;
+                duration = duration || 80;
+                if (!forcePreview && !appPreferences.soundEnabled) return;
+                if (appPreferences.volume <= 0) return;
+
                 try {
-                    initAudio(); if (!audioCtx) return;
+                    initAudio();
+                    if (!audioCtx) return;
+
+                    var profile = SOUND_PROFILES[appPreferences.soundProfile] || SOUND_PROFILES.digital;
                     var osc = audioCtx.createOscillator();
                     var gain = audioCtx.createGain();
-                    osc.type = 'sine'; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
-                    osc.connect(gain); gain.connect(audioCtx.destination);
-                    osc.start(); osc.stop(audioCtx.currentTime + duration / 1000);
+                    var now = audioCtx.currentTime;
+                    var level = Math.max(0.001, 0.28 * appPreferences.volume * profile.gainScale);
+
+                    osc.type = profile.oscillator;
+                    osc.frequency.value = freq * profile.frequencyScale;
+                    gain.gain.setValueAtTime(0.001, now);
+                    gain.gain.exponentialRampToValueAtTime(level, now + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration / 1000);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + duration / 1000 + 0.02);
                 } catch (e) {}
             }
 
-            function playCountdownTick(seconds) { playBeep(800, 80); }
+            function playCountdownTick(seconds) {
+                if (!appPreferences.countdownEnabled) return;
+                playBeep(seconds === 1 ? 1000 : 820, 85);
+            }
             function handleCountdownTick() {
                 if (timerState.isPaused) return;
                 var seconds = Math.ceil(timerState.currentTime);
@@ -1120,6 +1545,13 @@
                 setTimeout(function() { playBeep(900, 150); }, 180);
             }
             function playTickMetronome() { playBeep(1200, 30); }
+
+            function previewSelectedSound() {
+                initAudio();
+                playBeep(620, 120, true);
+                setTimeout(function() { playBeep(860, 120, true); }, 160);
+                setTimeout(function() { playBeep(1100, 220, true); }, 320);
+            }
 
             function calculateTotalDuration() {
                 var work = settings.work;
@@ -1147,28 +1579,207 @@
 
             // TICK METRONOMO
             function loadTickState() {
-                try { tickEnabled = localStorage.getItem('pt_timer_tick') === 'true'; } catch (e) { tickEnabled = false; }
-                tickToggle.classList.toggle('active', tickEnabled);
+                tickEnabled = appPreferences.tickEnabled === true;
+                setSwitchState(tickToggle, tickEnabled);
             }
             function saveTickState() {
-                try { localStorage.setItem('pt_timer_tick', tickEnabled ? 'true' : 'false'); } catch (e) {}
+                appPreferences.tickEnabled = tickEnabled;
+                saveAppPreferences();
             }
             tickToggle.addEventListener('click', function() {
                 tickEnabled = !tickEnabled;
-                this.classList.toggle('active', tickEnabled);
+                setSwitchState(this, tickEnabled);
                 saveTickState();
                 if (timerState.status === 'work' && !timerState.isPaused) startTick();
                 else stopTick();
             });
             function startTick() {
                 stopTick();
-                if (!tickEnabled || timerState.status !== 'work' || timerState.isPaused) return;
+                if (!tickEnabled || !appPreferences.soundEnabled || timerState.status !== 'work' || timerState.isPaused) return;
                 tickInterval = setInterval(function() {
-                    if (timerState.status === 'work' && !timerState.isPaused) playTickMetronome();
+                    if (timerState.status === 'work' && !timerState.isPaused && appPreferences.soundEnabled) playTickMetronome();
                     else stopTick();
                 }, 1000);
             }
             function stopTick() { if (tickInterval) { clearInterval(tickInterval); tickInterval = null; } }
+
+            // ==============================
+            // PREFERENZE APP
+            // ==============================
+            function setSwitchState(element, enabled) {
+                if (!element) return;
+                element.classList.toggle('active', !!enabled);
+                element.setAttribute('aria-checked', enabled ? 'true' : 'false');
+            }
+
+            function bindSwitchKeyboard(element) {
+                if (!element) return;
+                element.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        element.click();
+                    }
+                });
+            }
+
+            function sanitizePreferences(raw) {
+                var clean = Object.assign({}, DEFAULT_APP_PREFERENCES, raw || {});
+                if (['digital', 'energy', 'soft', 'retro'].indexOf(clean.soundProfile) === -1) clean.soundProfile = 'digital';
+                if (['krio', 'ice', 'pulse', 'ember'].indexOf(clean.theme) === -1) clean.theme = 'krio';
+                clean.volume = Math.min(1, Math.max(0, Number(clean.volume)));
+                ['soundEnabled', 'countdownEnabled', 'vibrationEnabled', 'wakeLockEnabled', 'reduceMotion', 'tickEnabled'].forEach(function(key) {
+                    clean[key] = clean[key] === true;
+                });
+                return clean;
+            }
+
+            function loadAppPreferences() {
+                try {
+                    var saved = JSON.parse(localStorage.getItem(PREFERENCES_KEY) || '{}');
+                    appPreferences = sanitizePreferences(saved);
+
+                    // Migrazione trasparente dalla vecchia preferenza del tick.
+                    if (!Object.prototype.hasOwnProperty.call(saved, 'tickEnabled')) {
+                        appPreferences.tickEnabled = localStorage.getItem('pt_timer_tick') === 'true';
+                    }
+                } catch (e) {
+                    appPreferences = Object.assign({}, DEFAULT_APP_PREFERENCES);
+                }
+            }
+
+            function saveAppPreferences() {
+                try { localStorage.setItem(PREFERENCES_KEY, JSON.stringify(appPreferences)); } catch (e) {}
+            }
+
+            function themeColorFor(name) {
+                return {
+                    krio: '#050b14',
+                    ice: '#02151d',
+                    pulse: '#0b0715',
+                    ember: '#150806'
+                }[name] || '#050b14';
+            }
+
+            function applyTheme(name) {
+                appPreferences.theme = name;
+                document.documentElement.setAttribute('data-theme', name);
+                themeButtons.forEach(function(button) {
+                    var active = button.getAttribute('data-theme-choice') === name;
+                    button.classList.toggle('active', active);
+                    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+                });
+
+                var themeMeta = document.querySelector('meta[name="theme-color"]');
+                if (themeMeta) themeMeta.setAttribute('content', themeColorFor(name));
+            }
+
+            function updateNetworkStatus() {
+                var online = navigator.onLine;
+                networkStatus.classList.toggle('offline', !online);
+                networkStatusLabel.textContent = online ? 'Online · offline pronto' : 'Offline · cache attiva';
+            }
+
+            function applyAppPreferencesToUI() {
+                setSwitchState(soundToggle, appPreferences.soundEnabled);
+                setSwitchState(countdownSoundToggle, appPreferences.countdownEnabled);
+                setSwitchState(vibrationToggle, appPreferences.vibrationEnabled);
+                setSwitchState(wakeLockToggle, appPreferences.wakeLockEnabled);
+                setSwitchState(reduceMotionToggle, appPreferences.reduceMotion);
+
+                soundProfileSelect.value = appPreferences.soundProfile;
+                soundVolume.value = Math.round(appPreferences.volume * 100);
+                soundVolumeValue.textContent = Math.round(appPreferences.volume * 100) + '%';
+                document.documentElement.classList.toggle('reduce-motion', appPreferences.reduceMotion);
+                applyTheme(appPreferences.theme);
+                appVersionLabel.textContent = APP_VERSION;
+                updateNetworkStatus();
+            }
+
+            btnToggleAppSettings.addEventListener('click', function() {
+                var open = !appSettingsPanel.classList.contains('open');
+                appSettingsPanel.classList.toggle('open', open);
+                appSettingsPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+                btnToggleAppSettings.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open) setTimeout(function() { btnToggleAppSettings.scrollIntoView({ block: 'nearest' }); }, 30);
+            });
+
+            soundToggle.addEventListener('click', function() {
+                appPreferences.soundEnabled = !appPreferences.soundEnabled;
+                setSwitchState(this, appPreferences.soundEnabled);
+                if (!appPreferences.soundEnabled) stopTick();
+                else if (timerState.status === 'work' && !timerState.isPaused) startTick();
+                saveAppPreferences();
+            });
+
+            countdownSoundToggle.addEventListener('click', function() {
+                appPreferences.countdownEnabled = !appPreferences.countdownEnabled;
+                setSwitchState(this, appPreferences.countdownEnabled);
+                saveAppPreferences();
+            });
+
+            vibrationToggle.addEventListener('click', function() {
+                appPreferences.vibrationEnabled = !appPreferences.vibrationEnabled;
+                setSwitchState(this, appPreferences.vibrationEnabled);
+                saveAppPreferences();
+                if (appPreferences.vibrationEnabled) triggerVibration([50]);
+            });
+
+            wakeLockToggle.addEventListener('click', function() {
+                appPreferences.wakeLockEnabled = !appPreferences.wakeLockEnabled;
+                setSwitchState(this, appPreferences.wakeLockEnabled);
+                saveAppPreferences();
+                if (appPreferences.wakeLockEnabled) requestWakeLock();
+                else releaseWakeLock();
+            });
+
+            reduceMotionToggle.addEventListener('click', function() {
+                appPreferences.reduceMotion = !appPreferences.reduceMotion;
+                setSwitchState(this, appPreferences.reduceMotion);
+                document.documentElement.classList.toggle('reduce-motion', appPreferences.reduceMotion);
+                saveAppPreferences();
+            });
+
+            soundProfileSelect.addEventListener('change', function() {
+                appPreferences.soundProfile = this.value;
+                saveAppPreferences();
+                previewSelectedSound();
+            });
+
+            soundVolume.addEventListener('input', function() {
+                appPreferences.volume = Math.min(1, Math.max(0, Number(this.value) / 100));
+                soundVolumeValue.textContent = this.value + '%';
+                saveAppPreferences();
+            });
+
+            soundVolume.addEventListener('change', function() {
+                if (appPreferences.volume > 0) previewSelectedSound();
+            });
+
+            themeButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    applyTheme(button.getAttribute('data-theme-choice'));
+                    saveAppPreferences();
+                });
+            });
+
+            btnPreviewSound.addEventListener('click', previewSelectedSound);
+
+            btnResetAppSettings.addEventListener('click', function() {
+                if (!confirm('Ripristinare tutte le impostazioni dell’app? I workout salvati non verranno eliminati.')) return;
+                appPreferences = Object.assign({}, DEFAULT_APP_PREFERENCES);
+                tickEnabled = false;
+                saveAppPreferences();
+                try { localStorage.removeItem('pt_timer_tick'); } catch (e) {}
+                applyAppPreferencesToUI();
+                loadTickState();
+                stopTick();
+                if (appPreferences.wakeLockEnabled && isRunning() && !timerState.isPaused) requestWakeLock();
+                previewSelectedSound();
+            });
+
+            [soundToggle, countdownSoundToggle, tickToggle, vibrationToggle, wakeLockToggle, reduceMotionToggle].forEach(bindSwitchKeyboard);
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
 
             // ==============================
             // LIBRERIA PRESET - SALVATAGGIO & CARICAMENTO
@@ -1795,6 +2406,7 @@
             var wakeLockSentinel = null;
 
             async function requestWakeLock() {
+                if (!appPreferences.wakeLockEnabled) return;
                 if (!('wakeLock' in navigator)) return;
                 if (!isRunning() || timerState.isPaused || document.visibilityState !== 'visible') return;
                 if (wakeLockSentinel) return;
@@ -1837,6 +2449,8 @@
             }
 
             // INIT
+            loadAppPreferences();
+            applyAppPreferencesToUI();
             loadTickState();
             loadLibraryPresets();
             loadPreset('hiit');

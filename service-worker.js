@@ -1,4 +1,4 @@
-const CACHE_NAME = 'krioplanet-timer-v3-icon-2026-07-28';
+const CACHE_NAME = 'krioplanet-timer-v4-settings-2026-07-29';
 const CORE_ASSETS = [
   './',
   './index.html',
